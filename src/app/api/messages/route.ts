@@ -67,6 +67,14 @@ export async function GET(request: Request) {
     })
 
     // Group messages by conversation (listing + other user)
+    type ConversationType = {
+      listingId: string
+      listing: typeof messages[0]['listing']
+      otherUser: typeof messages[0]['sender']
+      messages: typeof messages
+      unreadCount: number
+    }
+    
     const conversations = messages.reduce((acc, message) => {
       const otherUserId = message.senderId === session.user.id 
         ? message.receiverId 
@@ -89,7 +97,7 @@ export async function GET(request: Request) {
       }
       
       return acc
-    }, {} as Record<string, unknown>)
+    }, {} as Record<string, ConversationType>)
 
     return NextResponse.json({
       success: true,

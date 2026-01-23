@@ -1,12 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { SearchFilters, TermTag, PropertyType, ListingType } from '@/lib/types'
+import { SearchFilters as SearchFiltersType, TermTag, PropertyType, ListingType } from '@/lib/types'
 import { getTermTagLabel, getPropertyTypeLabel } from '@/lib/utils'
 
 interface SearchFiltersProps {
-  filters: SearchFilters
-  onFilterChange: (filters: SearchFilters) => void
+  filters: SearchFiltersType
+  onFilterChange: (filters: SearchFiltersType) => void
 }
 
 const TERM_TAGS: TermTag[] = ['FALL', 'WINTER', 'SPRING', 'SUMMER', 'FULL_YEAR']
@@ -16,7 +16,7 @@ const LISTING_TYPES: ListingType[] = ['SUBLEASE', 'RENTAL']
 export default function SearchFilters({ filters, onFilterChange }: SearchFiltersProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   
-  const updateFilter = (key: keyof SearchFilters, value: unknown) => {
+  const updateFilter = (key: keyof SearchFiltersType, value: unknown) => {
     onFilterChange({ ...filters, [key]: value })
   }
   
