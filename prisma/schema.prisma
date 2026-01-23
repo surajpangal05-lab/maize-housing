@@ -1,0 +1,202 @@
+// Maize Housing Database Schema
+// A housing platform for University of Michigan students and Ann Arbor landlords
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model with verification status
+model User {
+  id                    String    @id @default(cuid())
+  email                 String    @unique
+  emailVerified         DateTime?
+  passwordHash          String?
+  name                  String?
+  phone                 String?
+  phoneVerified         DateTime?
+  image                 String?
+  userType              String    @default("STUDENT") // STUDENT, LANDLORD
+  isUmichEmail          Boolean   @default(false)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  lastActiveAt          DateTime  @default(now())
+  
+  // Reputation tracking
+  successfulTransitions Int       @default(0)
+  
+  // Relations
+  listings              Listing[]
+  sentMessages          Message[]     @relation("SentMessages")
+  receivedMessages      Message[]     @relation("ReceivedMessages")
+  feedbackGiven         Feedback[]    @relation("FeedbackGiver")
+  feedbackReceived      Feedback[]    @relation("FeedbackReceiver")
+  verificationTokens    VerificationToken[]
+  savedListings         SavedListing[]
+  sessions              Session[]
+  accounts              Account[]
+}
+
+// NextAuth Account model
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+// NextAuth Session model
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Verification tokens for email/phone verification
+model VerificationToken {
+  id        String   @id @default(cuid())
+  userId    String?
+  email     String?
+  phone     String?
+  token     String   @unique
+  type      String   // EMAIL, PHONE, PASSWORD_RESET
+  expires   DateTime
+  createdAt DateTime @default(now())
+  
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([email, token])
+  @@unique([phone, token])
+}
+
+// Listing model supporting both SUBLEASE and RENTAL types
+model Listing {
+  id                String    @id @default(cuid())
+  userId            String
+  type              String    // SUBLEASE, RENTAL
+  status            String    @default("ACTIVE") // ACTIVE, PENDING, COMPLETED, EXPIRED, CANCELLED
+  
+  // Basic info
+  title             String
+  description       String
+  address           String
+  city              String    @default("Ann Arbor")
+  state             String    @default("MI")
+  zipCode           String
+  neighborhood      String?
+  
+  // Property details
+  propertyType      String    // APARTMENT, HOUSE, ROOM, STUDIO, TOWNHOUSE
+  bedrooms          Int
+  bathrooms         Float
+  sqft              Int?
+  
+  // Pricing
+  rent              Float
+  deposit           Float?
+  subleaseFee       Float?
+  utilitiesIncluded Boolean   @default(false)
+  utilitiesNotes    String?
+  
+  // Sublease-specific fields
+  termTags          String    // Comma-separated: FALL,WINTER,SPRING,SUMMER,FULL_YEAR
+  moveInDate        DateTime
+  moveInWindowStart DateTime?
+  moveInWindowEnd   DateTime?
+  leaseEndDate      DateTime
+  
+  // Amenities (JSON string)
+  amenities         String?
+  
+  // Images (JSON array of URLs)
+  images            String?
+  
+  // Quality control
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  expiresAt         DateTime
+  lastActivityAt    DateTime  @default(now())
+  renewedAt         DateTime?
+  viewCount         Int       @default(0)
+  
+  // Relations
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages          Message[]
+  savedBy           SavedListing[]
+  feedback          Feedback[]
+  
+  @@index([userId])
+  @@index([status])
+  @@index([type])
+  @@index([city])
+  @@index([expiresAt])
+}
+
+// Messages between users about listings
+model Message {
+  id          String   @id @default(cuid())
+  listingId   String
+  senderId    String
+  receiverId  String
+  content     String
+  read        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  
+  listing     Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  sender      User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver    User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  
+  @@index([listingId])
+  @@index([senderId])
+  @@index([receiverId])
+}
+
+// Private feedback after completed transactions
+model Feedback {
+  id              String   @id @default(cuid())
+  listingId       String
+  giverId         String
+  receiverId      String
+  overallRating   Int      // 1-5
+  wouldRentAgain  Boolean
+  notes           String?  // Private notes
+  createdAt       DateTime @default(now())
+  
+  listing         Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  giver           User     @relation("FeedbackGiver", fields: [giverId], references: [id], onDelete: Cascade)
+  receiver        User     @relation("FeedbackReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  
+  @@unique([listingId, giverId])
+  @@index([receiverId])
+}
+
+// Saved listings for users
+model SavedListing {
+  id        String   @id @default(cuid())
+  userId    String
+  listingId String
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, listingId])
+}
