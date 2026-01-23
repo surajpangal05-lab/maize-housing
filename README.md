@@ -184,3 +184,4 @@ TWILIO_PHONE_NUMBER=""
 ## 📄 License
 
 Built for the UMich community. © 2026 Maize Housing.
+
