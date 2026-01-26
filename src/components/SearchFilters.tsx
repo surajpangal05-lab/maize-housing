@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { SearchFilters as SearchFiltersType, TermTag, PropertyType, ListingType } from '@/lib/types'
 import { getTermTagLabel, getPropertyTypeLabel } from '@/lib/utils'
 
@@ -28,6 +29,10 @@ export default function SearchFilters({ filters, onFilterChange }: SearchFilters
     updateFilter('termTags', newTags.length > 0 ? newTags : undefined)
   }
   
+  const setOnlyTermTag = (tag: TermTag | null) => {
+    updateFilter('termTags', tag ? [tag] : undefined)
+  }
+  
   const clearFilters = () => {
     onFilterChange({})
   }
@@ -36,6 +41,55 @@ export default function SearchFilters({ filters, onFilterChange }: SearchFilters
 
   return (
     <div className="card">
+      {/* Term Tags - Segmented Control (Always Visible) */}
+      <div className="p-4 border-b border-neutral-100">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-sm font-medium text-neutral-500 mr-2">Term:</span>
+          <div className="inline-flex rounded-lg bg-neutral-100 p-1">
+            <button
+              onClick={() => setOnlyTermTag(null)}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                !filters.termTags?.length
+                  ? 'bg-white text-neutral-900 shadow-sm'
+                  : 'text-neutral-600 hover:text-neutral-900'
+              }`}
+            >
+              All
+            </button>
+            {TERM_TAGS.filter(t => t !== 'FULL_YEAR').map(tag => (
+              <button
+                key={tag}
+                onClick={() => setOnlyTermTag(tag)}
+                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                  filters.termTags?.length === 1 && filters.termTags.includes(tag)
+                    ? 'bg-[#FFCB05] text-[#00274C] shadow-sm'
+                    : 'text-neutral-600 hover:text-neutral-900'
+                }`}
+              >
+                {getTermTagLabel(tag)}
+              </button>
+            ))}
+          </div>
+          
+          {/* Full Year toggle */}
+          <label className="flex items-center gap-2 ml-4 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={filters.termTags?.includes('FULL_YEAR') || false}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  toggleTermTag('FULL_YEAR')
+                } else {
+                  updateFilter('termTags', filters.termTags?.filter(t => t !== 'FULL_YEAR'))
+                }
+              }}
+              className="rounded border-neutral-300 text-[#00274C] focus:ring-[#FFCB05]"
+            />
+            <span className="text-sm text-neutral-600">Full Year</span>
+          </label>
+        </div>
+      </div>
+      
       {/* Main Filters Row */}
       <div className="p-4 flex flex-wrap items-center gap-3">
         {/* Listing Type */}
@@ -103,6 +157,7 @@ export default function SearchFilters({ filters, onFilterChange }: SearchFilters
             type="checkbox"
             checked={filters.verifiedOnly || false}
             onChange={(e) => updateFilter('verifiedOnly', e.target.checked || undefined)}
+            className="rounded border-neutral-300 text-[#00274C] focus:ring-[#FFCB05]"
           />
           <span className="text-sm text-neutral-700 font-medium whitespace-nowrap">Verified Only</span>
         </label>
@@ -138,9 +193,9 @@ export default function SearchFilters({ filters, onFilterChange }: SearchFilters
       {isExpanded && (
         <div className="px-4 pb-4 pt-0 border-t border-neutral-100 animate-fade-in">
           <div className="pt-4 space-y-5">
-            {/* Term Tags */}
+            {/* Multi-select Term Tags */}
             <div>
-              <label className="label">Academic Term</label>
+              <label className="label">Select Multiple Terms</label>
               <div className="flex flex-wrap gap-2">
                 {TERM_TAGS.map(tag => (
                   <button
@@ -192,6 +247,53 @@ export default function SearchFilters({ filters, onFilterChange }: SearchFilters
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+// Empty State Component
+export function EmptyListingsState({ 
+  onClearFilters, 
+  hasFilters 
+}: { 
+  onClearFilters: () => void
+  hasFilters: boolean 
+}) {
+  return (
+    <div className="card p-16 text-center">
+      <div className="w-16 h-16 mx-auto mb-4 bg-neutral-100 rounded-full flex items-center justify-center">
+        <svg className="w-8 h-8 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+        </svg>
+      </div>
+      <h3 className="text-lg font-semibold text-neutral-900 mb-2">No listings found</h3>
+      <p className="text-neutral-500 mb-6 max-w-md mx-auto">
+        {hasFilters ? (
+          <>
+            Try adjusting your filters. You might find more results by:
+            <span className="block mt-2 text-sm">
+              • Selecting a different term or "All" terms<br />
+              • Expanding your price range<br />
+              • Removing the "Verified Only" filter
+            </span>
+          </>
+        ) : (
+          "There are no listings available right now. Check back soon or be the first to post!"
+        )}
+      </p>
+      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+        {hasFilters && (
+          <button 
+            onClick={onClearFilters} 
+            className="btn btn-outline"
+          >
+            Clear Filters
+          </button>
+        )}
+        <Link href="/listings/create" className="btn btn-primary">
+          Post a Listing
+        </Link>
+      </div>
     </div>
   )
 }

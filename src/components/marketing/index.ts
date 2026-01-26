@@ -1,0 +1,10 @@
+export { default as Hero } from './Hero'
+export { default as ProblemSection } from './ProblemSection'
+export { default as FeatureGrid } from './FeatureGrid'
+export { default as HowItWorks } from './HowItWorks'
+export { default as VerificationTrust } from './VerificationTrust'
+export { default as SubleasePacket } from './SubleasePacket'
+export { default as Testimonials } from './Testimonials'
+export { default as FAQAccordion } from './FAQAccordion'
+export { default as FinalCTA } from './FinalCTA'
+

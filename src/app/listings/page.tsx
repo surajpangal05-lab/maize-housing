@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import ListingCard from '@/components/ListingCard'
-import SearchFilters from '@/components/SearchFilters'
+import SearchFilters, { EmptyListingsState } from '@/components/SearchFilters'
 import { ListingWithUser, SearchFilters as SearchFiltersType } from '@/lib/types'
 
 export default function ListingsPage() {
@@ -53,15 +54,27 @@ export default function ListingsPage() {
     }
   }
   
+  const hasActiveFilters = Object.values(filters).some(v => v !== undefined && v !== '' && (Array.isArray(v) ? v.length > 0 : true))
+  
   return (
     <div className="min-h-screen bg-neutral-50">
       {/* Header */}
       <div className="bg-white border-b border-neutral-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <h1 className="text-2xl font-bold text-neutral-900">Browse Listings</h1>
-          <p className="mt-1 text-neutral-500">
-            Find verified subleases and rentals in Ann Arbor
-          </p>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold text-neutral-900">Browse Listings</h1>
+              <p className="mt-1 text-neutral-500">
+                Find verified subleases and rentals in Ann Arbor
+              </p>
+            </div>
+            <Link href="/listings/create" className="btn btn-primary">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Post Listing
+            </Link>
+          </div>
         </div>
       </div>
       
@@ -83,7 +96,10 @@ export default function ListingsPage() {
                 Loading...
               </span>
             ) : (
-              <span className="font-medium">{pagination.total} listing{pagination.total !== 1 ? 's' : ''}</span>
+              <span>
+                <span className="font-medium">{pagination.total}</span> listing{pagination.total !== 1 ? 's' : ''} found
+                {hasActiveFilters && <span className="text-neutral-400 ml-1">(filtered)</span>}
+              </span>
             )}
           </p>
           
@@ -141,21 +157,10 @@ export default function ListingsPage() {
             )}
           </>
         ) : (
-          <div className="card p-16 text-center">
-            <div className="w-16 h-16 mx-auto mb-4 bg-neutral-100 rounded-full flex items-center justify-center">
-              <svg className="w-8 h-8 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-semibold text-neutral-900 mb-2">No listings found</h3>
-            <p className="text-neutral-500 mb-6">Try adjusting your filters or check back later.</p>
-            <button 
-              onClick={() => setFilters({})} 
-              className="btn btn-primary"
-            >
-              Clear Filters
-            </button>
-          </div>
+          <EmptyListingsState 
+            onClearFilters={() => setFilters({})} 
+            hasFilters={hasActiveFilters}
+          />
         )}
       </div>
     </div>
