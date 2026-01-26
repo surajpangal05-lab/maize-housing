@@ -43,7 +43,7 @@ export default function RootLayout({
                   <div className="flex gap-6">
                     <a href="#" className="text-sm text-neutral-500 hover:text-neutral-700 transition-colors">Terms</a>
                     <a href="#" className="text-sm text-neutral-500 hover:text-neutral-700 transition-colors">Privacy</a>
-                    <a href="#" className="text-sm text-neutral-500 hover:text-neutral-700 transition-colors">Contact</a>
+                    <Link href="/contact" className="text-sm text-neutral-500 hover:text-neutral-700 transition-colors">Contact</Link>
                   </div>
                 </div>
               </div>

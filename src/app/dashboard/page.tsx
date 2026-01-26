@@ -109,6 +109,28 @@ export default function DashboardPage() {
     }
   }
   
+  const handleDelete = async (listingId: string) => {
+    if (!confirm('Are you sure you want to delete this listing? This action cannot be undone.')) {
+      return
+    }
+    
+    try {
+      const response = await fetch(`/api/listings/${listingId}`, {
+        method: 'DELETE',
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        fetchData()
+      } else {
+        alert(data.error || 'Failed to delete listing')
+      }
+    } catch {
+      alert('Something went wrong')
+    }
+  }
+  
   if (status === 'loading' || loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -245,6 +267,7 @@ export default function DashboardPage() {
                 showActions
                 onRenew={handleRenew}
                 onComplete={handleComplete}
+                onDelete={handleDelete}
                 isStale={listing.isStale}
                 isExpired={listing.isExpired}
               />
@@ -280,6 +303,8 @@ export default function DashboardPage() {
               <ListingCard 
                 key={listing.id} 
                 listing={listing}
+                showActions
+                onDelete={handleDelete}
               />
             ))}
           </div>

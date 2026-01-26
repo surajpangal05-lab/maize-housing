@@ -9,6 +9,7 @@ interface ListingCardProps {
   showActions?: boolean
   onRenew?: (id: string) => void
   onComplete?: (id: string) => void
+  onDelete?: (id: string) => void
   isStale?: boolean
   isExpired?: boolean
 }
@@ -18,6 +19,7 @@ export default function ListingCard({
   showActions = false,
   onRenew,
   onComplete,
+  onDelete,
   isStale = false,
   isExpired = false
 }: ListingCardProps) {
@@ -178,6 +180,14 @@ export default function ListingCard({
             >
               Edit
             </Link>
+            {onDelete && (
+              <button 
+                onClick={() => onDelete(listing.id)}
+                className="btn btn-outline flex-1 py-2 text-xs text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+              >
+                Delete
+              </button>
+            )}
           </div>
         )}
       </div>
