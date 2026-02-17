@@ -10,80 +10,76 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <header className="border-b border-neutral-200 bg-white">
-      <div className="max-w-5xl mx-auto px-8">
-        <div className="flex items-center justify-between h-14">
+    <header className="border-b border-neutral-200 bg-white sticky top-0 z-50">
+      <div className="max-w-4xl mx-auto px-6">
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center gap-8">
-            <Link href="/" className="flex items-center">
-              <Image
-                src="/logo.png"
-                alt="MaizeLease"
-                width={100}
-                height={33}
-                className="h-6 w-auto grayscale"
-                priority
-              />
+          <Link href="/" className="flex items-center gap-2">
+            <Image
+              src="/logo.png"
+              alt="MaizeLease"
+              width={28}
+              height={28}
+              className="h-7 w-7"
+              priority
+            />
+            <span className="font-semibold text-neutral-900">MaizeLease</span>
+          </Link>
+          
+          {/* Nav Links - Center */}
+          <nav className="hidden md:flex items-center gap-8">
+            <Link href="/listings" className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors">
+              Browse
             </Link>
-            
-            {/* Nav Links */}
-            <nav className="hidden md:flex items-center gap-6">
-              <Link href="/listings" className="text-xs text-neutral-600 hover:text-neutral-900 tracking-wider">
-                Browse
-              </Link>
-              <Link href="/listings" className="text-xs text-neutral-600 hover:text-neutral-900 tracking-wider">
-                Search
-              </Link>
-              <Link href="/listings/create" className="text-xs text-neutral-600 hover:text-neutral-900 tracking-wider">
-                Post Sublease
-              </Link>
-            </nav>
-          </div>
+            <Link href="/listings/create" className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors">
+              Post
+            </Link>
+            <Link href="/#how-it-works" className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors">
+              How It Works
+            </Link>
+          </nav>
 
           {/* Right Section */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             {status === 'loading' ? (
-              <div className="w-8 h-8 bg-neutral-100 animate-pulse" />
+              <div className="w-20 h-8 bg-neutral-100 animate-pulse" />
             ) : session ? (
-              <div className="hidden md:flex items-center gap-3">
-                <Link href="/messages" className="w-8 h-8 border border-neutral-900 flex items-center justify-center hover:bg-neutral-100 transition-colors">
-                  <svg className="w-4 h-4 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
+              <div className="hidden md:flex items-center gap-4">
+                <Link 
+                  href="/messages" 
+                  className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
+                >
+                  Messages
                 </Link>
-                <Link href="/profile" className="w-8 h-8 border border-neutral-900 flex items-center justify-center hover:bg-neutral-100 transition-colors">
-                  <svg className="w-4 h-4 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
+                <Link 
+                  href="/profile" 
+                  className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
+                >
+                  Profile
                 </Link>
                 <button
                   onClick={() => signOut({ callbackUrl: '/' })}
-                  className="text-xs text-neutral-400 hover:text-neutral-600 tracking-wider"
+                  className="text-sm text-neutral-400 hover:text-neutral-600 transition-colors"
                 >
                   Sign Out
                 </button>
               </div>
             ) : (
-              <div className="hidden md:flex items-center gap-3">
-                <Link href="/messages" className="w-8 h-8 border border-neutral-900 flex items-center justify-center hover:bg-neutral-100 transition-colors">
-                  <svg className="w-4 h-4 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
-                </Link>
-                <Link href="/login" className="w-8 h-8 border border-neutral-900 flex items-center justify-center hover:bg-neutral-100 transition-colors">
-                  <svg className="w-4 h-4 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </Link>
-              </div>
+              <Link 
+                href="/login" 
+                className="hidden md:block text-sm font-medium text-neutral-900 hover:text-neutral-600 transition-colors"
+              >
+                Log In
+              </Link>
             )}
             
             {/* Mobile menu button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden w-8 h-8 border border-neutral-900 flex items-center justify-center"
+              className="md:hidden p-2 -mr-2"
+              aria-label="Menu"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-neutral-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {mobileMenuOpen ? (
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
                 ) : (
@@ -98,57 +94,84 @@ export default function Header() {
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-neutral-200 bg-white">
-          <nav className="max-w-5xl mx-auto px-8 py-4 space-y-3">
+          <nav className="max-w-4xl mx-auto px-6 py-4 space-y-4">
             <Link 
               href="/listings" 
-              className="block text-xs text-neutral-600 hover:text-neutral-900 tracking-wider"
+              className="block text-sm text-neutral-900"
               onClick={() => setMobileMenuOpen(false)}
             >
               Browse
             </Link>
             <Link 
-              href="/listings" 
-              className="block text-xs text-neutral-600 hover:text-neutral-900 tracking-wider"
+              href="/listings/create" 
+              className="block text-sm text-neutral-900"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Search
+              Post
             </Link>
             <Link 
-              href="/listings/create" 
-              className="block text-xs text-neutral-600 hover:text-neutral-900 tracking-wider"
+              href="/#how-it-works" 
+              className="block text-sm text-neutral-900"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Post Sublease
+              How It Works
             </Link>
-            {session ? (
-              <>
+            <div className="border-t border-neutral-200 pt-4">
+              {session ? (
+                <>
+                  <Link 
+                    href="/messages" 
+                    className="block text-sm text-neutral-600 mb-3"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Messages
+                  </Link>
+                  <Link 
+                    href="/profile" 
+                    className="block text-sm text-neutral-600 mb-3"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Profile
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false)
+                      signOut({ callbackUrl: '/' })
+                    }}
+                    className="block text-sm text-neutral-400"
+                  >
+                    Sign Out
+                  </button>
+                </>
+              ) : (
                 <Link 
-                  href="/messages" 
-                  className="block text-xs text-neutral-600 hover:text-neutral-900 tracking-wider"
+                  href="/login" 
+                  className="block text-sm font-medium text-neutral-900"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Messages
+                  Log In
                 </Link>
-                <Link 
-                  href="/profile" 
-                  className="block text-xs text-neutral-600 hover:text-neutral-900 tracking-wider"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Profile
-                </Link>
-              </>
-            ) : (
-              <Link 
-                href="/login" 
-                className="block text-xs text-neutral-600 hover:text-neutral-900 tracking-wider"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Sign In
-              </Link>
-            )}
+              )}
+            </div>
           </nav>
         </div>
       )}
+
+      {/* Mobile Sticky CTAs */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 z-50 px-4 py-3 flex gap-3">
+        <Link 
+          href="/listings"
+          className="flex-1 py-3 bg-neutral-900 text-white text-sm font-medium text-center"
+        >
+          Browse
+        </Link>
+        <Link 
+          href="/listings/create"
+          className="flex-1 py-3 border border-neutral-900 text-neutral-900 text-sm font-medium text-center"
+        >
+          Post
+        </Link>
+      </div>
     </header>
   )
 }

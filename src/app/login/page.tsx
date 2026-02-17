@@ -65,8 +65,8 @@ function LoginForm() {
         </div>
 
         {/* Form */}
-        <div className="border border-neutral-900 p-6">
-          <h1 className="text-3xl font-serif text-neutral-900 mb-2">Sign In</h1>
+        <div className="border border-neutral-200 p-8">
+          <h1 className="text-2xl font-semibold text-neutral-900 mb-2">Sign In</h1>
           <p className="text-neutral-500 text-sm mb-8">Welcome back to MaizeLease</p>
           
           <form onSubmit={handleSubmit} className="space-y-6">
