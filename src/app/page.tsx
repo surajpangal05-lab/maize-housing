@@ -1,5 +1,6 @@
 import {
   Hero,
+  MaizeMaze,
   ProblemSection,
   FeatureGrid,
   HowItWorks,
@@ -13,16 +14,19 @@ import {
 export default function Home() {
   return (
     <div className="min-h-screen">
-      {/* Hero - Above the fold conversion section */}
+      {/* Hero - Full width with Ann Arbor imagery */}
       <Hero />
+      
+      {/* Features - Why MaizeLease */}
+      <FeatureGrid />
+      
+      {/* Interactive Maize Maze - Unique engagement element */}
+      <MaizeMaze />
       
       {/* Problem - Create urgency */}
       <ProblemSection />
       
-      {/* Features - 4 card grid */}
-      <FeatureGrid />
-      
-      {/* How it Works - 4 step process */}
+      {/* How it Works - 4 step timeline */}
       <HowItWorks />
       
       {/* Trust & Verification - Build credibility */}
@@ -31,17 +35,14 @@ export default function Home() {
       {/* Sublease Packet - Product feature highlight */}
       <SubleasePacket />
       
-      {/* Testimonials - Social proof (feature flagged) */}
+      {/* Testimonials - Social proof carousel */}
       <Testimonials />
       
-      {/* FAQ - Answer common questions */}
+      {/* FAQ - Searchable accordion */}
       <FAQAccordion />
       
       {/* Final CTA - Conversion close */}
       <FinalCTA />
-      
-      {/* Add bottom padding on mobile for fixed CTA bar */}
-      <div className="h-20 md:hidden" />
     </div>
   )
 }

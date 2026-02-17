@@ -1,119 +1,155 @@
 'use client'
 
 import Link from 'next/link'
-import { homeContent } from '@/content/home'
+import { useEffect, useState } from 'react'
 
 export default function Hero() {
-  const { hero, stats } = homeContent
+  const [isVisible, setIsVisible] = useState(false)
+  
+  useEffect(() => {
+    setIsVisible(true)
+  }, [])
+
+  const stats = [
+    { value: '60+', label: 'Verified Listings' },
+    { value: '4', label: 'Academic Terms' },
+    { value: '100%', label: 'Free to Use' },
+  ]
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-neutral-50 via-white to-amber-50/30">
-      {/* Decorative gradient orbs */}
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-br from-[#FFCB05]/20 to-transparent rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-[#00274C]/10 to-transparent rounded-full blur-3xl translate-y-1/2 -translate-x-1/4" />
-      
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
-        <div className="text-center max-w-4xl mx-auto">
+    <section className="relative min-h-screen flex items-center overflow-hidden">
+      {/* Background Image with Overlay */}
+      <div className="absolute inset-0">
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url('https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=1920&q=80')`,
+          }}
+        />
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#00274C]/95 via-[#00274C]/85 to-[#1E3A5F]/80" />
+        
+        {/* Decorative Maize Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <defs>
+              <pattern id="maize-pattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                <circle cx="10" cy="10" r="1" fill="#FFCB05" />
+              </pattern>
+            </defs>
+            <rect width="100" height="100" fill="url(#maize-pattern)" />
+          </svg>
+        </div>
+        
+        {/* Animated Wave */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 overflow-hidden">
+          <svg viewBox="0 0 1440 120" fill="none" className="absolute bottom-0 w-full">
+            <path 
+              d="M0 120L48 108C96 96 192 72 288 66C384 60 480 72 576 78C672 84 768 84 864 78C960 72 1056 60 1152 60C1248 60 1344 72 1392 78L1440 84V120H1392C1344 120 1248 120 1152 120C1056 120 960 120 864 120C768 120 672 120 576 120C480 120 384 120 288 120C192 120 96 120 48 120H0Z" 
+              fill="white"
+            />
+          </svg>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="relative container pt-32 pb-48">
+        <div className="max-w-4xl">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border border-neutral-100 mb-8">
+          <div className={`inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full mb-8 transition-all duration-700 ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          }`}>
             <span className="w-2 h-2 bg-[#FFCB05] rounded-full animate-pulse" />
-            <span className="text-sm font-medium text-neutral-600">Built for the UMich Community</span>
+            <span className="text-white/90 text-sm font-medium">Trusted by UMich Students</span>
           </div>
           
-          {/* H1 from content */}
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-neutral-900 leading-tight tracking-tight">
-            {hero.headline.split(' ').map((word, i) => (
-              word === 'Michigan' ? (
-                <span key={i} className="bg-gradient-to-r from-[#00274C] to-[#1E3A5F] bg-clip-text text-transparent">{word} </span>
-              ) : (
-                <span key={i}>{word} </span>
-              )
-            ))}
+          {/* Headline */}
+          <h1 className={`text-white mb-6 transition-all duration-700 delay-100 ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          }`}>
+            Find Your Perfect{' '}
+            <span className="text-[#FFCB05]">UMich Home</span>
           </h1>
           
-          {/* Subhead */}
-          <p className="mt-4 text-2xl sm:text-3xl font-semibold text-[#00274C]">
-            {hero.subheadline}
-          </p>
-          
-          {/* Description */}
-          <p className="mt-6 text-xl text-neutral-600 max-w-2xl mx-auto leading-relaxed">
-            {hero.description}
+          {/* Subheadline */}
+          <p className={`text-xl md:text-2xl text-white/80 mb-8 max-w-2xl leading-relaxed transition-all duration-700 delay-200 ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          }`}>
+            Verified Subleases & Leases Tailored to Your Semester. 
+            The only housing platform built specifically for Michigan students.
           </p>
 
           {/* CTAs */}
-          <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+          <div className={`flex flex-wrap gap-4 mb-16 transition-all duration-700 delay-300 ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          }`}>
             <Link
-              href={hero.primaryCTA.href}
-              className="inline-flex items-center justify-center px-8 py-4 text-base font-semibold rounded-full bg-[#00274C] text-white hover:bg-[#1E3A5F] transition-all shadow-lg shadow-[#00274C]/20 hover:shadow-xl hover:-translate-y-0.5"
+              href="/listings"
+              className="btn btn-primary btn-lg group"
             >
-              {hero.primaryCTA.text}
-              <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              Browse Listings
+              <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
             </Link>
             <Link
-              href={hero.secondaryCTA.href}
-              className="inline-flex items-center justify-center px-8 py-4 text-base font-semibold rounded-full bg-white text-neutral-900 border border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50 transition-all"
+              href="/listings/create"
+              className="btn btn-secondary btn-lg"
             >
-              {hero.secondaryCTA.text}
+              Post Your Listing Free
             </Link>
           </div>
 
-          {/* Stats Row - feature flagged */}
-          {stats.enabled && (
-            <div className="mt-16 flex flex-wrap justify-center gap-12 lg:gap-20">
-              {stats.items.map((stat, index) => (
-                <div key={index} className="text-center">
-                  <p className="text-4xl lg:text-5xl font-bold text-[#00274C]">{stat.value}</p>
-                  <p className="mt-1 text-sm font-medium text-neutral-500">{stat.label}</p>
+          {/* Stats Bar */}
+          <div className={`flex flex-wrap gap-8 md:gap-16 transition-all duration-700 delay-400 ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          }`}>
+            {stats.map((stat, index) => (
+              <div key={index} className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-[#FFCB05]/20 flex items-center justify-center">
+                  <span className="text-[#FFCB05] font-bold text-lg">{stat.value}</span>
                 </div>
-              ))}
-            </div>
-          )}
+                <span className="text-white/70 text-sm font-medium">{stat.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
 
-          {/* Trust Badges */}
-          <div className={`${stats.enabled ? 'mt-16' : 'mt-16'} pt-12 border-t border-neutral-200`}>
-            <p className="text-sm font-medium text-neutral-400 mb-6">Trusted verification features</p>
-            <div className="flex flex-wrap justify-center gap-6 lg:gap-10">
-              {hero.trustBadges.map((badge, index) => (
-                <div key={index} className="flex items-center gap-2 text-neutral-600">
-                  <div className="w-8 h-8 rounded-lg bg-[#FFCB05]/20 flex items-center justify-center">
-                    <TrustIcon name={badge.icon} />
-                  </div>
-                  <span className="text-sm font-medium">{badge.text}</span>
-                </div>
-              ))}
+        {/* Floating Card Preview */}
+        <div className={`hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 w-80 transition-all duration-1000 delay-500 ${
+          isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-20'
+        }`}>
+          <div className="bg-white rounded-2xl shadow-2xl p-6 animate-float">
+            <div className="w-full h-40 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl mb-4 flex items-center justify-center">
+              <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+            </div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="badge badge-maize">Verified</span>
+              <span className="badge badge-gray">Fall 2025</span>
+            </div>
+            <h4 className="font-semibold text-[#00274C] mb-1">Cozy 2BR near Campus</h4>
+            <p className="text-gray-500 text-sm mb-3">Ann Arbor, Central Campus</p>
+            <div className="flex items-center justify-between">
+              <span className="text-xl font-bold text-[#00274C]">$1,200/mo</span>
+              <span className="text-sm text-[#228B22] font-medium">Available Now</span>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Scroll Indicator */}
+      <div className={`absolute bottom-8 left-1/2 -translate-x-1/2 transition-all duration-700 delay-700 ${
+        isVisible ? 'opacity-100' : 'opacity-0'
+      }`}>
+        <div className="flex flex-col items-center gap-2 animate-bounce">
+          <span className="text-white/50 text-xs font-medium tracking-wider">SCROLL</span>
+          <svg className="w-5 h-5 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
+        </div>
+      </div>
     </section>
   )
-}
-
-function TrustIcon({ name }: { name: string }) {
-  const icons: Record<string, React.ReactNode> = {
-    'shield-check': (
-      <svg className="w-4 h-4 text-[#00274C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-      </svg>
-    ),
-    'building': (
-      <svg className="w-4 h-4 text-[#00274C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-      </svg>
-    ),
-    'calendar': (
-      <svg className="w-4 h-4 text-[#00274C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-      </svg>
-    ),
-    'file-text': (
-      <svg className="w-4 h-4 text-[#00274C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-      </svg>
-    ),
-  }
-  return icons[name] || null
 }
