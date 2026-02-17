@@ -173,27 +173,27 @@ program
         const validListings = listings.filter((listing) => {
           // Must have a title (non-empty and meaningful)
           if (!listing.title || listing.title.trim().length < 3) {
-            logger.debug({ title: listing.title }, 'Filtered: missing or invalid title');
+            logger.info({ title: listing.title, url: listing.canonicalUrl }, 'Filtered: missing or invalid title');
             return false;
           }
-          // Filter out titles that are just bedroom types
+          // Filter out titles that are ONLY bedroom types (no property name)
           const badTitlePatterns = [
             /^\s*-?\s*(studio|1|2|3|4|5)\s*bed(room)?s?\s*$/i,
             /^\s*bed(room)?\s*$/i,
           ];
           if (badTitlePatterns.some(p => p.test(listing.title || ''))) {
-            logger.debug({ title: listing.title }, 'Filtered: generic/bad title');
+            logger.info({ title: listing.title, url: listing.canonicalUrl }, 'Filtered: generic/bad title');
             return false;
           }
-          // Rent validation: must be reasonable ($200-$20,000/month)
+          // Rent validation: only filter if rent IS set AND is unreasonable ($200-$20,000/month)
           const rent = listing.priceMin || listing.priceMax;
-          if (rent !== null && rent !== undefined && (rent < 200 || rent > 20000)) {
-            logger.debug({ title: listing.title, rent }, 'Filtered: unreasonable rent');
+          if (rent !== null && rent !== undefined && rent > 0 && (rent < 200 || rent > 20000)) {
+            logger.info({ title: listing.title, rent, url: listing.canonicalUrl }, 'Filtered: unreasonable rent');
             return false;
           }
           // Must have canonical URL
           if (!listing.canonicalUrl) {
-            logger.debug({ title: listing.title }, 'Filtered: missing canonical URL');
+            logger.info({ title: listing.title }, 'Filtered: missing canonical URL');
             return false;
           }
           return true;

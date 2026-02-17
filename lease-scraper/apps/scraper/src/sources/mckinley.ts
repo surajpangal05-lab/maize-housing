@@ -95,10 +95,14 @@ export class McKinleyScraper extends HtmlScraper {
 
         if (beds !== null || price !== null) {
           foundFloorPlans = true;
+          const bedsLabel = beds === 0 ? 'Studio' : beds ? `${beds} Bedroom` : null;
+          const title = propertyName && bedsLabel 
+            ? `${propertyName} - ${bedsLabel}` 
+            : propertyName || `Ann Arbor Apartment ${bedsLabel || ''}`.trim();
           listings.push({
             sourceListingId: `mckinley-${url.split('/').pop()}-${beds}br`,
             canonicalUrl: url,
-            title: `${propertyName} - ${beds || 'Studio'} Bedroom`,
+            title,
             street,
             city,
             state,
