@@ -93,11 +93,15 @@ export class SyncEngine {
 
       this.logger.info({ count: normalized.length }, 'Listings normalized');
 
-      // Step 3: Deduplicate
-      const deduped = this.deduplicate(normalized);
+      // Step 3: Validate listings (filter out bad data)
+      const validated = this.validateListings(normalized);
+      this.logger.info({ count: validated.length, filtered: normalized.length - validated.length }, 'Listings validated');
+
+      // Step 4: Deduplicate
+      const deduped = this.deduplicate(validated);
       this.logger.info({ count: deduped.length }, 'Listings deduplicated');
 
-      // Step 4: Upsert each listing
+      // Step 5: Upsert each listing
       for (const listing of deduped) {
         try {
           const result = await this.upsertListing(source.id, listing);
@@ -220,6 +224,53 @@ export class SyncEngine {
     });
 
     return fetcher.fetchAll();
+  }
+
+  /**
+   * Validate listings to filter out bad/incomplete data
+   */
+  private validateListings(listings: NormalizedListing[]): NormalizedListing[] {
+    return listings.filter((listing) => {
+      // Must have a title (non-empty and not just whitespace)
+      if (!listing.title || listing.title.trim().length < 3) {
+        this.logger.debug({ title: listing.title }, 'Filtered: missing or invalid title');
+        return false;
+      }
+
+      // Filter out titles that are just bedroom types without real info
+      const badTitlePatterns = [
+        /^\s*-?\s*(studio|1|2|3|4|5)\s*bed(room)?s?\s*$/i,
+        /^\s*bed(room)?\s*$/i,
+        /^\s*$/, // Empty
+      ];
+      if (badTitlePatterns.some(p => p.test(listing.title || ''))) {
+        this.logger.debug({ title: listing.title }, 'Filtered: generic/bad title');
+        return false;
+      }
+
+      // Rent validation: must be reasonable (between $200 and $20,000/month)
+      const minRent = listing.priceMin || listing.priceMax;
+      if (minRent !== null && minRent !== undefined) {
+        if (minRent < 200 || minRent > 20000) {
+          this.logger.debug({ title: listing.title, rent: minRent }, 'Filtered: unreasonable rent');
+          return false;
+        }
+      }
+
+      // Must have a canonical URL
+      if (!listing.canonicalUrl) {
+        this.logger.debug({ title: listing.title }, 'Filtered: missing canonical URL');
+        return false;
+      }
+
+      // Must have city or at least some location info
+      if (!listing.city && !listing.street) {
+        this.logger.debug({ title: listing.title }, 'Filtered: missing location');
+        return false;
+      }
+
+      return true;
+    });
   }
 
   private deduplicate(listings: NormalizedListing[]): NormalizedListing[] {

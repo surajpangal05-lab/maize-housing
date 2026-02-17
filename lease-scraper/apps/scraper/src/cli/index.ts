@@ -169,8 +169,40 @@ program
           });
         }
 
+        // Validate and filter listings
+        const validListings = listings.filter((listing) => {
+          // Must have a title (non-empty and meaningful)
+          if (!listing.title || listing.title.trim().length < 3) {
+            logger.debug({ title: listing.title }, 'Filtered: missing or invalid title');
+            return false;
+          }
+          // Filter out titles that are just bedroom types
+          const badTitlePatterns = [
+            /^\s*-?\s*(studio|1|2|3|4|5)\s*bed(room)?s?\s*$/i,
+            /^\s*bed(room)?\s*$/i,
+          ];
+          if (badTitlePatterns.some(p => p.test(listing.title || ''))) {
+            logger.debug({ title: listing.title }, 'Filtered: generic/bad title');
+            return false;
+          }
+          // Rent validation: must be reasonable ($200-$20,000/month)
+          const rent = listing.priceMin || listing.priceMax;
+          if (rent !== null && rent !== undefined && (rent < 200 || rent > 20000)) {
+            logger.debug({ title: listing.title, rent }, 'Filtered: unreasonable rent');
+            return false;
+          }
+          // Must have canonical URL
+          if (!listing.canonicalUrl) {
+            logger.debug({ title: listing.title }, 'Filtered: missing canonical URL');
+            return false;
+          }
+          return true;
+        });
+
+        logger.info({ source: sourceName, valid: validListings.length, filtered: listings.length - validListings.length }, 'Validated listings');
+
         // Upsert listings
-        for (const listing of listings) {
+        for (const listing of validListings) {
           if (limit > 0 && totalUpserted >= limit) break;
 
           try {
