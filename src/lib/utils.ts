@@ -12,8 +12,8 @@ export function isUmichEmail(email: string): boolean {
 
 export function getVerificationBadge(
   userType: UserType,
-  emailVerified: Date | null,
-  phoneVerified: Date | null,
+  emailVerified: Date | string | null,
+  phoneVerified: Date | string | null,
   isUmichEmail: boolean
 ): VerificationBadge {
   if (userType === 'STUDENT' && emailVerified && isUmichEmail) {

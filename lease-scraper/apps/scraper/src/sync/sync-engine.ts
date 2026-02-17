@@ -333,7 +333,7 @@ export class SyncEngine {
         canonicalUrl: true,
         title: true,
       },
-      take: this.options.limit > 0 ? this.options.limit : 1000,
+      take: (this.options.limit ?? 0) > 0 ? this.options.limit : 1000,
     });
 
     this.logger.info({ count: listings.length }, 'Listings to scrape for contact info');

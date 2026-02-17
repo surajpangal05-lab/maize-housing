@@ -1,25 +1,25 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { scraperPrisma } from '@/lib/scraper-db'
 import { listingSchema } from '@/lib/validations'
 import { getExpirationDate } from '@/lib/utils'
 
-const SCRAPER_API_URL = process.env.SCRAPER_API_URL || 'http://localhost:3002'
-
-// Fetch a scraped listing from the scraper API
+// Fetch a scraped listing directly from database
 async function fetchScrapedListing(scrapedId: string) {
   try {
-    const response = await fetch(`${SCRAPER_API_URL}/listings/${scrapedId}`)
-    
-    if (!response.ok) return null
-    
-    const data = await response.json()
-    const scraped = data.data
+    const scraped = await scraperPrisma.listing.findUnique({
+      where: { id: scrapedId },
+      include: {
+        images: { orderBy: { sortOrder: 'asc' } },
+        source: true,
+      },
+    })
     
     if (!scraped) return null
     
     // Get ALL images from the scraped listing
-    const images = scraped.images?.map((img: { originalUrl: string; storedUrl: string | null }) => 
+    const images = scraped.images?.map((img) => 
       img.originalUrl || img.storedUrl
     ).filter(Boolean) || []
     
@@ -53,16 +53,16 @@ async function fetchScrapedListing(scrapedId: string) {
       utilitiesIncluded: null,
       utilitiesNotes: null,
       termTags: '',
-      moveInDate: scraped.availabilityDate || null,
+      moveInDate: scraped.availabilityDate?.toISOString() || null,
       moveInWindowStart: null,
       moveInWindowEnd: null,
       leaseEndDate: null,
       amenities: scraped.amenitiesJson ? JSON.stringify(scraped.amenitiesJson) : null,
       images: images.length > 0 ? JSON.stringify(images) : null,
-      createdAt: scraped.createdAt,
-      updatedAt: scraped.updatedAt,
+      createdAt: scraped.createdAt.toISOString(),
+      updatedAt: scraped.updatedAt.toISOString(),
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      lastActivityAt: scraped.scrapedAt,
+      lastActivityAt: scraped.scrapedAt.toISOString(),
       renewedAt: null,
       viewCount: 0,
       // Contact info from scraper
@@ -77,7 +77,7 @@ async function fetchScrapedListing(scrapedId: string) {
         emailVerified: new Date().toISOString(),
         phoneVerified: null,
         isUmichEmail: false,
-        lastActiveAt: scraped.scrapedAt,
+        lastActiveAt: scraped.scrapedAt.toISOString(),
         successfulTransitions: 0,
       }
     }

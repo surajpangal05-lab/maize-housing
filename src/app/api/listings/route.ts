@@ -1,65 +1,56 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { scraperPrisma } from '@/lib/scraper-db'
 import { listingSchema } from '@/lib/validations'
 import { getExpirationDate, getVerificationBadge } from '@/lib/utils'
 import { UserType } from '@/lib/types'
 
-const SCRAPER_API_URL = process.env.SCRAPER_API_URL || 'http://localhost:3002'
-
-// Fetch scraped listings from the scraper API
+// Fetch scraped listings directly from database
 async function fetchScrapedListings(searchParams: URLSearchParams) {
   try {
-    const params = new URLSearchParams()
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 100)
+    const skip = (page - 1) * limit
     
-    const page = searchParams.get('page') || '1'
-    const limit = searchParams.get('limit') || '20'
-    params.set('page', page)
-    params.set('limit', limit)
+    // Build where clause for filters
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const where: any = {}
     
-    if (searchParams.get('city')) params.set('city', searchParams.get('city')!)
-    if (searchParams.get('minRent')) params.set('minPrice', searchParams.get('minRent')!)
-    if (searchParams.get('maxRent')) params.set('maxPrice', searchParams.get('maxRent')!)
-    if (searchParams.get('bedrooms')) params.set('beds', searchParams.get('bedrooms')!)
-    if (searchParams.get('query')) params.set('q', searchParams.get('query')!)
+    if (searchParams.get('city')) {
+      where.city = { contains: searchParams.get('city'), mode: 'insensitive' }
+    }
+    if (searchParams.get('minRent')) {
+      where.priceMin = { gte: parseFloat(searchParams.get('minRent')!) }
+    }
+    if (searchParams.get('maxRent')) {
+      where.priceMax = { lte: parseFloat(searchParams.get('maxRent')!) }
+    }
+    if (searchParams.get('bedrooms')) {
+      where.beds = parseInt(searchParams.get('bedrooms')!)
+    }
     
-    const response = await fetch(`${SCRAPER_API_URL}/listings?${params.toString()}`, {
-      next: { revalidate: 300 },
-    })
-    
-    if (!response.ok) return { listings: [], total: 0 }
-    
-    const data = await response.json()
+    const [scrapedListings, total] = await Promise.all([
+      scraperPrisma.listing.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          images: { orderBy: { sortOrder: 'asc' } },
+          source: true,
+        },
+      }),
+      scraperPrisma.listing.count({ where }),
+    ])
     
     // Transform to our format
-    const listings = data.data.map((scraped: {
-      id: string
-      title: string | null
-      description: string | null
-      street: string | null
-      unit: string | null
-      city: string | null
-      state: string | null
-      zip: string | null
-      beds: number | null
-      baths: number | null
-      sqft: number | null
-      priceMin: number | null
-      priceMax: number | null
-      propertyType: string | null
-      availabilityDate: string | null
-      deposit: number | null
-      amenitiesJson: unknown
-      contactJson: { phone?: string; email?: string; name?: string } | null
-      canonicalUrl: string
-      createdAt: string
-      updatedAt: string
-      scrapedAt: string
-      images: { originalUrl: string; storedUrl: string | null }[]
-      source: { name: string }
-    }) => {
-      // Get ALL images, not just the first one
-      const images = scraped.images?.map((img: { originalUrl: string; storedUrl: string | null }) => img.originalUrl || img.storedUrl).filter(Boolean) || []
+    const listings = scrapedListings.map((scraped) => {
+      // Get ALL images
+      const images = scraped.images?.map((img) => img.originalUrl || img.storedUrl).filter(Boolean) || []
+      
+      // Parse contact JSON
+      const contactJson = scraped.contactJson as { phone?: string; email?: string; name?: string } | null
       
       // Only include fields that actually have data - don't hallucinate
       const hasAddress = scraped.street || scraped.unit
@@ -71,7 +62,6 @@ async function fetchScrapedListings(searchParams: URLSearchParams) {
         userId: null,
         type: 'RENTAL',
         status: 'ACTIVE',
-        // Only use title if it exists, otherwise create a simple one from available data
         title: scraped.title || (scraped.beds ? `${scraped.beds} BR` : 'Rental') + (hasCity ? ` in ${scraped.city}` : ''),
         description: scraped.description || null,
         address: hasAddress ? [scraped.street, scraped.unit].filter(Boolean).join(', ') : null,
@@ -89,37 +79,37 @@ async function fetchScrapedListings(searchParams: URLSearchParams) {
         utilitiesIncluded: null,
         utilitiesNotes: null,
         termTags: '',
-        moveInDate: scraped.availabilityDate || null,
+        moveInDate: scraped.availabilityDate?.toISOString() || null,
         moveInWindowStart: null,
         moveInWindowEnd: null,
         leaseEndDate: null,
         amenities: scraped.amenitiesJson ? JSON.stringify(scraped.amenitiesJson) : null,
         images: images.length > 0 ? JSON.stringify(images) : null,
-        createdAt: scraped.createdAt,
-        updatedAt: scraped.updatedAt,
+        createdAt: scraped.createdAt.toISOString(),
+        updatedAt: scraped.updatedAt.toISOString(),
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        lastActivityAt: scraped.scrapedAt,
+        lastActivityAt: scraped.scrapedAt.toISOString(),
         renewedAt: null,
         viewCount: 0,
         // Contact info from scraper
-        contactPhone: scraped.contactJson?.phone || null,
-        contactEmail: scraped.contactJson?.email || null,
-        contactName: scraped.contactJson?.name || null,
+        contactPhone: contactJson?.phone || null,
+        contactEmail: contactJson?.email || null,
+        contactName: contactJson?.name || null,
         user: {
           id: 'scraped',
           email: 'listings@maizeleasing.com',
-          name: scraped.contactJson?.name || 'Property Manager',
+          name: contactJson?.name || 'Property Manager',
           userType: 'LANDLORD',
           emailVerified: new Date().toISOString(),
           phoneVerified: null,
           isUmichEmail: false,
-          lastActiveAt: scraped.scrapedAt,
+          lastActiveAt: scraped.scrapedAt.toISOString(),
           successfulTransitions: 0,
         }
       }
     })
     
-    return { listings, total: data.pagination.total }
+    return { listings, total }
   } catch (error) {
     console.error('Error fetching scraped listings:', error)
     return { listings: [], total: 0 }
@@ -249,7 +239,8 @@ export async function GET(request: Request) {
       
       // Combine user listings with scraped listings
       // User listings first, then scraped
-      allListings = [...allListings, ...scraped.listings]
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      allListings = [...allListings, ...scraped.listings] as any
     }
 
     return NextResponse.json({
