@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { homeContent } from '@/content/home'
 
 export default function Hero() {
-  const { hero } = homeContent
+  const { hero, stats } = homeContent
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-neutral-50 via-white to-amber-50/30">
@@ -20,13 +20,25 @@ export default function Hero() {
             <span className="text-sm font-medium text-neutral-600">Built for the UMich Community</span>
           </div>
           
+          {/* H1 from content */}
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-neutral-900 leading-tight tracking-tight">
-            Digital Treasures for{' '}
-            <span className="bg-gradient-to-r from-[#00274C] to-[#1E3A5F] bg-clip-text text-transparent">Students</span>
+            {hero.headline.split(' ').map((word, i) => (
+              word === 'Michigan' ? (
+                <span key={i} className="bg-gradient-to-r from-[#00274C] to-[#1E3A5F] bg-clip-text text-transparent">{word} </span>
+              ) : (
+                <span key={i}>{word} </span>
+              )
+            ))}
           </h1>
           
+          {/* Subhead */}
+          <p className="mt-4 text-2xl sm:text-3xl font-semibold text-[#00274C]">
+            {hero.subheadline}
+          </p>
+          
+          {/* Description */}
           <p className="mt-6 text-xl text-neutral-600 max-w-2xl mx-auto leading-relaxed">
-            Browse a rich collection of verified housing listings and subleases for your academic journey at Michigan.
+            {hero.description}
           </p>
 
           {/* CTAs */}
@@ -48,24 +60,20 @@ export default function Hero() {
             </Link>
           </div>
 
-          {/* Stats Row */}
-          <div className="mt-16 flex flex-wrap justify-center gap-12 lg:gap-20">
-            <div className="text-center">
-              <p className="text-4xl lg:text-5xl font-bold text-[#00274C]">500+</p>
-              <p className="mt-1 text-sm font-medium text-neutral-500">Verified Students</p>
+          {/* Stats Row - feature flagged */}
+          {stats.enabled && (
+            <div className="mt-16 flex flex-wrap justify-center gap-12 lg:gap-20">
+              {stats.items.map((stat, index) => (
+                <div key={index} className="text-center">
+                  <p className="text-4xl lg:text-5xl font-bold text-[#00274C]">{stat.value}</p>
+                  <p className="mt-1 text-sm font-medium text-neutral-500">{stat.label}</p>
+                </div>
+              ))}
             </div>
-            <div className="text-center">
-              <p className="text-4xl lg:text-5xl font-bold text-[#00274C]">200+</p>
-              <p className="mt-1 text-sm font-medium text-neutral-500">Listings</p>
-            </div>
-            <div className="text-center">
-              <p className="text-4xl lg:text-5xl font-bold text-[#00274C]">150+</p>
-              <p className="mt-1 text-sm font-medium text-neutral-500">Successful Matches</p>
-            </div>
-          </div>
+          )}
 
           {/* Trust Badges */}
-          <div className="mt-16 pt-12 border-t border-neutral-200">
+          <div className={`${stats.enabled ? 'mt-16' : 'mt-16'} pt-12 border-t border-neutral-200`}>
             <p className="text-sm font-medium text-neutral-400 mb-6">Trusted verification features</p>
             <div className="flex flex-wrap justify-center gap-6 lg:gap-10">
               {hero.trustBadges.map((badge, index) => (
