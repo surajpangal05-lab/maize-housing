@@ -4,7 +4,6 @@ import { useState, Suspense } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 
 function LoginForm() {
   const router = useRouter()
@@ -42,80 +41,60 @@ function LoginForm() {
   }
   
   return (
-    <div className="min-h-screen bg-white">
-      {/* Back link */}
-      <div className="border-b border-neutral-200">
-        <div className="max-w-5xl mx-auto px-8 py-3">
-          <Link href="/" className="text-xs text-neutral-500 hover:text-neutral-900">
-            ← Back to Home
+    <div className="w-full max-w-md">
+      <div className="card p-8">
+        <div className="text-center mb-8">
+          <img src="/logo.png" alt="MaizeLease" className="h-[67px] mx-auto mb-6" />
+          <h1 className="text-2xl font-bold text-neutral-900">Welcome back</h1>
+          <p className="mt-2 text-neutral-500">Sign in to your MaizeLease account</p>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {error && (
+            <div className="alert alert-error">
+              {error}
+            </div>
+          )}
+          
+          <div>
+            <label className="label">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@umich.edu"
+              required
+              className="input"
+            />
+          </div>
+          
+          <div>
+            <label className="label">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              required
+              className="input"
+            />
+          </div>
+          
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn btn-primary w-full py-3"
+          >
+            {loading ? 'Signing in...' : 'Sign In'}
+          </button>
+        </form>
+        
+        <p className="mt-6 text-center text-sm text-neutral-500">
+          Don&apos;t have an account?{' '}
+          <Link href="/register" className="font-semibold text-[#00274C] hover:underline">
+            Create one
           </Link>
-        </div>
-      </div>
-
-      <div className="max-w-sm mx-auto px-8 py-12">
-        {/* Logo */}
-        <div className="text-center mb-12">
-          <Image
-            src="/logo.png"
-            alt="MaizeLease"
-            width={160}
-            height={53}
-            className="h-12 w-auto mx-auto grayscale"
-          />
-        </div>
-
-        {/* Form */}
-        <div className="border border-neutral-200 p-8">
-          <h1 className="text-2xl font-semibold text-neutral-900 mb-2">Sign In</h1>
-          <p className="text-neutral-500 text-sm mb-8">Welcome back to MaizeLease</p>
-          
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="p-3 border border-red-500 text-red-600 text-xs">
-                {error}
-              </div>
-            )}
-            
-            <div>
-              <label className="label">EMAIL</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@umich.edu"
-                required
-                className="w-full px-4 py-3 text-sm border border-neutral-900 focus:outline-none"
-              />
-            </div>
-            
-            <div>
-              <label className="label">PASSWORD</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                className="w-full px-4 py-3 text-sm border border-neutral-900 focus:outline-none"
-              />
-            </div>
-            
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-4 bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-800 transition-colors disabled:opacity-50"
-            >
-              {loading ? 'SIGNING IN...' : 'SIGN IN'}
-            </button>
-          </form>
-          
-          <p className="mt-8 text-center text-sm text-neutral-500">
-            Don&apos;t have an account?{' '}
-            <Link href="/register" className="text-neutral-900 hover:underline">
-              Create one
-            </Link>
-          </p>
-        </div>
+        </p>
       </div>
     </div>
   )
@@ -123,22 +102,10 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="animate-pulse w-full max-w-md px-4">
-          <div className="h-12 bg-neutral-100 w-32 mx-auto mb-12" />
-          <div className="border border-neutral-200 p-8">
-            <div className="h-8 bg-neutral-100 w-24 mb-8" />
-            <div className="space-y-6">
-              <div className="h-12 bg-neutral-100" />
-              <div className="h-12 bg-neutral-100" />
-              <div className="h-12 bg-neutral-100" />
-            </div>
-          </div>
-        </div>
-      </div>
-    }>
-      <LoginForm />
-    </Suspense>
+    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center px-4 py-12 bg-neutral-50">
+      <Suspense fallback={<div className="w-full max-w-md animate-pulse"><div className="card p-8 h-96 bg-neutral-200" /></div>}>
+        <LoginForm />
+      </Suspense>
+    </div>
   )
 }
