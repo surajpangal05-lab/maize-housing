@@ -72,8 +72,8 @@ export default function MessageThread({
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 ? (
-          <div className="text-center text-neutral-500 py-8">
-            <p>No messages yet. Start the conversation!</p>
+          <div className="text-center text-neutral-400 py-8 text-xs">
+            No messages yet. Start the conversation!
           </div>
         ) : (
           messages.map((message) => {
@@ -81,20 +81,42 @@ export default function MessageThread({
             return (
               <div 
                 key={message.id}
-                className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
+                className={`flex items-end gap-2 ${isOwn ? 'justify-end' : 'justify-start'}`}
               >
-                <div className={`max-w-[75%] ${isOwn ? 'order-1' : ''}`}>
-                  <div className={`px-4 py-2.5 rounded-2xl ${
-                    isOwn 
-                      ? 'bg-[#00274C] text-white rounded-br-md' 
-                      : 'bg-neutral-100 text-neutral-900 rounded-bl-md'
-                  }`}>
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                {!isOwn && (
+                  <div className="w-8 h-8 border border-neutral-300 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
                   </div>
-                  <p className={`text-xs text-neutral-400 mt-1 ${isOwn ? 'text-right' : ''}`}>
-                    {message.sender.name || message.sender.email.split('@')[0]} • {formatRelativeTime(message.createdAt)}
-                  </p>
+                )}
+                
+                <div className={`max-w-[70%]`}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs text-neutral-600">
+                      {message.sender.name || message.sender.email.split('@')[0]}
+                    </span>
+                    <span className="text-xs text-neutral-400">
+                      {formatRelativeTime(message.createdAt)}
+                    </span>
+                    {isOwn && <span className="text-xs text-neutral-500">You</span>}
+                  </div>
+                  <div className={`px-4 py-3 text-sm ${
+                    isOwn 
+                      ? 'bg-neutral-900 text-white' 
+                      : 'border border-neutral-200'
+                  }`}>
+                    <p className="whitespace-pre-wrap">{message.content}</p>
+                  </div>
                 </div>
+                
+                {isOwn && (
+                  <div className="w-8 h-8 border border-neutral-900 bg-neutral-900 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                )}
               </div>
             )
           })
@@ -104,38 +126,36 @@ export default function MessageThread({
       {/* Input */}
       <div className="border-t border-neutral-200 p-4">
         {error && (
-          <div className="mb-3 text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">
+          <div className="mb-3 text-xs text-red-600 border border-red-500 px-3 py-2">
             {error}
           </div>
         )}
         <form onSubmit={handleSend} className="flex gap-3">
+          <button type="button" className="p-2 border border-neutral-300 hover:border-neutral-900 transition-colors">
+            <svg className="w-5 h-5 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+            </svg>
+          </button>
           <input
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Type your message..."
-            className="flex-1 input"
+            placeholder="Type a message..."
+            className="flex-1 px-4 py-2 text-sm border border-neutral-300 focus:outline-none focus:border-neutral-900"
             disabled={sending}
           />
           <button
             type="submit"
             disabled={sending || !newMessage.trim()}
-            className="btn btn-primary px-6"
+            className="px-4 py-2 bg-neutral-900 text-white text-xs tracking-wider hover:bg-neutral-800 transition-colors disabled:opacity-50 flex items-center gap-2"
           >
-            {sending ? (
-              <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-            ) : (
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-              </svg>
-            )}
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
+            SEND
           </button>
         </form>
       </div>
     </div>
   )
 }
-

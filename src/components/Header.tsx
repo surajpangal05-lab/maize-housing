@@ -3,293 +3,152 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useSession, signOut } from 'next-auth/react'
-import { useState, useEffect } from 'react'
-import { usePathname } from 'next/navigation'
-import { homeContent } from '@/content/home'
+import { useState } from 'react'
 
 export default function Header() {
   const { data: session, status } = useSession()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
-  const pathname = usePathname()
-  
-  const isHomePage = pathname === '/'
-  const { navigation } = homeContent
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10)
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
-  // Close mobile menu on route change
-  useEffect(() => {
-    setMobileMenuOpen(false)
-  }, [pathname])
 
   return (
-    <>
-      <header className={`sticky top-0 z-50 transition-all duration-300 ${
-        scrolled 
-          ? 'bg-white/95 backdrop-blur-lg border-b border-neutral-200 shadow-sm' 
-          : 'bg-white/80 backdrop-blur-lg border-b border-neutral-200'
-      }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-              <Image 
-                src="/logo.png" 
-                alt="MaizeLease" 
-                width={194} 
-                height={72}
-                className="h-14 w-auto"
+    <header className="border-b border-neutral-200 bg-white">
+      <div className="max-w-5xl mx-auto px-8">
+        <div className="flex items-center justify-between h-14">
+          {/* Logo */}
+          <div className="flex items-center gap-8">
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/logo.png"
+                alt="MaizeLease"
+                width={100}
+                height={33}
+                className="h-6 w-auto grayscale"
                 priority
               />
             </Link>
-
-            {/* Center Navigation - Marketing Links (only on home page) */}
-            {isHomePage && (
-              <nav className="hidden lg:flex items-center gap-1">
-                {navigation.links.map((link) => (
-                  <a 
-                    key={link.href}
-                    href={link.href}
-                    className="px-4 py-2 text-sm font-medium text-neutral-600 hover:text-[#00274C] rounded-lg hover:bg-neutral-100 transition-colors"
-                  >
-                    {link.text}
-                  </a>
-                ))}
-              </nav>
-            )}
-
-            {/* Desktop Navigation - App Links (when logged in or not on home page) */}
-            {!isHomePage && (
-              <nav className="hidden md:flex items-center gap-1">
-                <Link 
-                  href="/listings" 
-                  className="px-4 py-2 text-sm font-medium text-neutral-600 hover:text-[#00274C] rounded-lg hover:bg-neutral-100 transition-colors"
-                >
-                  Browse Listings
-                </Link>
-                {session && (
-                  <>
-                    <Link 
-                      href="/listings/create" 
-                      className="px-4 py-2 text-sm font-medium text-neutral-600 hover:text-[#00274C] rounded-lg hover:bg-neutral-100 transition-colors"
-                    >
-                      Post Listing
-                    </Link>
-                    <Link 
-                      href="/dashboard" 
-                      className="px-4 py-2 text-sm font-medium text-neutral-600 hover:text-[#00274C] rounded-lg hover:bg-neutral-100 transition-colors"
-                    >
-                      Dashboard
-                    </Link>
-                    <Link 
-                      href="/messages" 
-                      className="px-4 py-2 text-sm font-medium text-neutral-600 hover:text-[#00274C] rounded-lg hover:bg-neutral-100 transition-colors"
-                    >
-                      Messages
-                    </Link>
-                  </>
-                )}
-              </nav>
-            )}
-
-            {/* Right Section - CTAs and Auth */}
-            <div className="flex items-center gap-3">
-              {/* CTA Buttons (visible on home page for non-logged in users) */}
-              {isHomePage && !session && status !== 'loading' && (
-                <div className="hidden md:flex items-center gap-2">
-                  <Link 
-                    href="/listings" 
-                    className="px-4 py-2 text-sm font-semibold text-[#00274C] hover:bg-neutral-100 rounded-lg transition-colors"
-                  >
-                    Browse Listings
-                  </Link>
-                  <Link 
-                    href="/register" 
-                    className="px-4 py-2 text-sm font-semibold bg-[#FFCB05] text-[#00274C] hover:bg-[#FFD84D] rounded-lg transition-colors"
-                  >
-                    Post a Listing
-                  </Link>
-                </div>
-              )}
-
-              {status === 'loading' ? (
-                <div className="w-24 h-9 bg-neutral-100 rounded-lg animate-pulse" />
-              ) : session ? (
-                <div className="flex items-center gap-3">
-                  {/* Quick action buttons when logged in */}
-                  {isHomePage && (
-                    <div className="hidden md:flex items-center gap-2">
-                      <Link 
-                        href="/listings" 
-                        className="px-4 py-2 text-sm font-semibold text-[#00274C] hover:bg-neutral-100 rounded-lg transition-colors"
-                      >
-                        Browse
-                      </Link>
-                      <Link 
-                        href="/listings/create" 
-                        className="px-4 py-2 text-sm font-semibold bg-[#FFCB05] text-[#00274C] hover:bg-[#FFD84D] rounded-lg transition-colors"
-                      >
-                        Post Listing
-                      </Link>
-                    </div>
-                  )}
-                  <Link 
-                    href="/profile"
-                    className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-neutral-100 transition-colors"
-                  >
-                    <div className="w-7 h-7 rounded-full bg-[#FFCB05] flex items-center justify-center">
-                      <span className="text-[#00274C] text-sm font-semibold">
-                        {session.user?.name?.[0]?.toUpperCase() || session.user?.email?.[0]?.toUpperCase() || 'U'}
-                      </span>
-                    </div>
-                    <span className="text-sm font-medium text-neutral-700">
-                      {session.user?.name?.split(' ')[0] || 'Account'}
-                    </span>
-                  </Link>
-                  <button
-                    onClick={() => signOut({ callbackUrl: '/' })}
-                    className="text-sm font-medium text-neutral-500 hover:text-neutral-700 transition-colors"
-                  >
-                    Sign Out
-                  </button>
-                </div>
-              ) : (
-                <div className="hidden md:flex items-center gap-2">
-                  <Link 
-                    href="/login" 
-                    className="text-sm font-medium text-neutral-600 hover:text-[#00274C] transition-colors px-3 py-2"
-                  >
-                    Sign In
-                  </Link>
-                </div>
-              )}
-              
-              {/* Mobile menu button */}
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="lg:hidden p-2 rounded-lg hover:bg-neutral-100 transition-colors"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  {mobileMenuOpen ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  )}
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Navigation Drawer */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-neutral-200 bg-white">
-            <nav className="px-4 py-3 space-y-1">
-              {/* Marketing links on home page */}
-              {isHomePage && (
-                <>
-                  {navigation.links.map((link) => (
-                    <a 
-                      key={link.href}
-                      href={link.href}
-                      className="block px-4 py-2.5 text-sm font-medium text-neutral-600 hover:text-[#00274C] rounded-lg hover:bg-neutral-100 transition-colors"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      {link.text}
-                    </a>
-                  ))}
-                  <div className="my-2 border-t border-neutral-100" />
-                </>
-              )}
-              
-              <Link 
-                href="/listings" 
-                className="block px-4 py-2.5 text-sm font-medium text-neutral-600 hover:text-[#00274C] rounded-lg hover:bg-neutral-100 transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Browse Listings
+            
+            {/* Nav Links */}
+            <nav className="hidden md:flex items-center gap-6">
+              <Link href="/listings" className="text-xs text-neutral-600 hover:text-neutral-900 tracking-wider">
+                Browse
               </Link>
-              {session ? (
-                <>
-                  <Link 
-                    href="/listings/create" 
-                    className="block px-4 py-2.5 text-sm font-medium text-neutral-600 hover:text-[#00274C] rounded-lg hover:bg-neutral-100 transition-colors"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Post Listing
-                  </Link>
-                  <Link 
-                    href="/dashboard" 
-                    className="block px-4 py-2.5 text-sm font-medium text-neutral-600 hover:text-[#00274C] rounded-lg hover:bg-neutral-100 transition-colors"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Dashboard
-                  </Link>
-                  <Link 
-                    href="/messages" 
-                    className="block px-4 py-2.5 text-sm font-medium text-neutral-600 hover:text-[#00274C] rounded-lg hover:bg-neutral-100 transition-colors"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Messages
-                  </Link>
-                  <Link 
-                    href="/profile" 
-                    className="block px-4 py-2.5 text-sm font-medium text-neutral-600 hover:text-[#00274C] rounded-lg hover:bg-neutral-100 transition-colors"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Profile
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <div className="my-2 border-t border-neutral-100" />
-                  <Link 
-                    href="/login" 
-                    className="block px-4 py-2.5 text-sm font-medium text-neutral-600 hover:text-[#00274C] rounded-lg hover:bg-neutral-100 transition-colors"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Sign In
-                  </Link>
-                  <Link 
-                    href="/register" 
-                    className="block px-4 py-2.5 text-sm font-semibold text-[#00274C] bg-[#FFCB05] rounded-lg hover:bg-[#FFD84D] transition-colors text-center"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Get Started
-                  </Link>
-                </>
-              )}
+              <Link href="/listings" className="text-xs text-neutral-600 hover:text-neutral-900 tracking-wider">
+                Search
+              </Link>
+              <Link href="/listings/create" className="text-xs text-neutral-600 hover:text-neutral-900 tracking-wider">
+                Post Sublease
+              </Link>
             </nav>
           </div>
-        )}
-      </header>
 
-      {/* Mobile Bottom Fixed CTA Bar (only on home page for non-logged in users) */}
-      {isHomePage && !session && status !== 'loading' && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white border-t border-neutral-200 p-3 shadow-lg">
-          <div className="flex gap-3">
+          {/* Right Section */}
+          <div className="flex items-center gap-3">
+            {status === 'loading' ? (
+              <div className="w-8 h-8 bg-neutral-100 animate-pulse" />
+            ) : session ? (
+              <div className="hidden md:flex items-center gap-3">
+                <Link href="/messages" className="w-8 h-8 border border-neutral-900 flex items-center justify-center hover:bg-neutral-100 transition-colors">
+                  <svg className="w-4 h-4 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                </Link>
+                <Link href="/profile" className="w-8 h-8 border border-neutral-900 flex items-center justify-center hover:bg-neutral-100 transition-colors">
+                  <svg className="w-4 h-4 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </Link>
+                <button
+                  onClick={() => signOut({ callbackUrl: '/' })}
+                  className="text-xs text-neutral-400 hover:text-neutral-600 tracking-wider"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <div className="hidden md:flex items-center gap-3">
+                <Link href="/messages" className="w-8 h-8 border border-neutral-900 flex items-center justify-center hover:bg-neutral-100 transition-colors">
+                  <svg className="w-4 h-4 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                </Link>
+                <Link href="/login" className="w-8 h-8 border border-neutral-900 flex items-center justify-center hover:bg-neutral-100 transition-colors">
+                  <svg className="w-4 h-4 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </Link>
+              </div>
+            )}
+            
+            {/* Mobile menu button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden w-8 h-8 border border-neutral-900 flex items-center justify-center"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {mobileMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Navigation */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t border-neutral-200 bg-white">
+          <nav className="max-w-5xl mx-auto px-8 py-4 space-y-3">
             <Link 
               href="/listings" 
-              className="flex-1 py-3 text-sm font-semibold text-center text-[#00274C] bg-neutral-100 hover:bg-neutral-200 rounded-lg transition-colors"
+              className="block text-xs text-neutral-600 hover:text-neutral-900 tracking-wider"
+              onClick={() => setMobileMenuOpen(false)}
             >
               Browse
             </Link>
             <Link 
-              href="/register" 
-              className="flex-1 py-3 text-sm font-semibold text-center text-[#00274C] bg-[#FFCB05] hover:bg-[#FFD84D] rounded-lg transition-colors"
+              href="/listings" 
+              className="block text-xs text-neutral-600 hover:text-neutral-900 tracking-wider"
+              onClick={() => setMobileMenuOpen(false)}
             >
-              Post Listing
+              Search
             </Link>
-          </div>
+            <Link 
+              href="/listings/create" 
+              className="block text-xs text-neutral-600 hover:text-neutral-900 tracking-wider"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Post Sublease
+            </Link>
+            {session ? (
+              <>
+                <Link 
+                  href="/messages" 
+                  className="block text-xs text-neutral-600 hover:text-neutral-900 tracking-wider"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Messages
+                </Link>
+                <Link 
+                  href="/profile" 
+                  className="block text-xs text-neutral-600 hover:text-neutral-900 tracking-wider"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Profile
+                </Link>
+              </>
+            ) : (
+              <Link 
+                href="/login" 
+                className="block text-xs text-neutral-600 hover:text-neutral-900 tracking-wider"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Sign In
+              </Link>
+            )}
+          </nav>
         </div>
       )}
-    </>
+    </header>
   )
 }

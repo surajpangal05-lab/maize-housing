@@ -22,23 +22,23 @@ const TERM_TAGS: { value: TermTag; label: string }[] = [
   { value: 'FULL_YEAR', label: 'Full Year' },
 ]
 
-const AMENITIES = [
-  'In-unit Laundry', 'On-site Laundry', 'Parking', 'Gym', 'Pool',
-  'Air Conditioning', 'Heating', 'Dishwasher', 'Furnished', 'Unfurnished',
-  'Pet Friendly', 'Balcony', 'Rooftop', 'Doorman', 'Elevator',
-]
+const AMENITIES_LEFT = ['Wi-Fi', 'Kitchen', 'Pet Friendly', 'Air Conditioning']
+const AMENITIES_RIGHT = ['Laundry', 'Parking', 'Furnished', 'Heating']
+
+const STEPS = ['Details', 'Photos', 'Pricing', 'Review']
 
 export default function CreateListingPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const [currentStep, setCurrentStep] = useState(0)
   
   const [formData, setFormData] = useState({
     type: 'SUBLEASE' as ListingType,
     title: '',
     description: '',
     address: '',
-    city: 'Ann Arbor',
-    state: 'MI',
+    city: '',
+    state: '',
     zipCode: '',
     neighborhood: '',
     propertyType: 'APARTMENT' as PropertyType,
@@ -64,10 +64,12 @@ export default function CreateListingPage() {
   
   if (status === 'loading') {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-12">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-neutral-200 rounded w-1/3" />
-          <div className="h-64 bg-neutral-200 rounded" />
+      <div className="min-h-screen bg-white">
+        <div className="max-w-3xl mx-auto px-4 py-12">
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 bg-neutral-100 w-1/3" />
+            <div className="h-64 bg-neutral-100" />
+          </div>
         </div>
       </div>
     )
@@ -75,25 +77,18 @@ export default function CreateListingPage() {
   
   if (!session) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-16 text-center">
-        <div className="card p-12">
-          <h1 className="text-2xl font-bold text-neutral-900 mb-4">Sign in to Post a Listing</h1>
-          <p className="text-neutral-500 mb-6">You need to be signed in and verified to create a listing.</p>
-          <Link href="/login" className="btn btn-primary">
-            Sign In
-          </Link>
+      <div className="min-h-screen bg-white">
+        <div className="max-w-3xl mx-auto px-4 py-16 text-center">
+          <div className="border border-neutral-200 p-12">
+            <h1 className="text-2xl font-serif text-neutral-900 mb-4">Sign in to Post a Listing</h1>
+            <p className="text-neutral-500 mb-6">You need to be signed in and verified to create a listing.</p>
+            <Link href="/login" className="inline-block px-6 py-3 bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-800 transition-colors">
+              Sign In
+            </Link>
+          </div>
         </div>
       </div>
     )
-  }
-  
-  const toggleTermTag = (tag: TermTag) => {
-    setFormData(prev => ({
-      ...prev,
-      termTags: prev.termTags.includes(tag)
-        ? prev.termTags.filter(t => t !== tag)
-        : [...prev.termTags, tag]
-    }))
   }
   
   const toggleAmenity = (amenity: string) => {
@@ -144,388 +139,275 @@ export default function CreateListingPage() {
   }
   
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-neutral-900">Create a Listing</h1>
-        <p className="mt-2 text-neutral-500">
-          Fill out the details below to post your sublease or rental.
-        </p>
+    <div className="min-h-screen bg-white">
+      {/* Back link */}
+      <div className="border-b border-neutral-200">
+        <div className="max-w-5xl mx-auto px-8 py-3">
+          <Link href="/" className="text-xs text-neutral-500 hover:text-neutral-900">
+            ← Back to Home
+          </Link>
+        </div>
       </div>
-      
-      <form onSubmit={handleSubmit} className="space-y-8">
-        {error && (
-          <div className="alert alert-error">
-            {error}
-          </div>
-        )}
-        
-        {/* Listing Type */}
-        <div className="card p-6">
-          <h2 className="text-lg font-semibold text-neutral-900 mb-4">Listing Type</h2>
-          <div className="grid grid-cols-2 gap-3">
+
+      <div className="max-w-2xl mx-auto px-8 py-10">
+        {/* Header */}
+        <div className="mb-12">
+          <h1 className="text-4xl font-serif text-neutral-900 mb-2">Post a Sublease</h1>
+          <p className="text-neutral-500">Fill out the form below to list your apartment</p>
+        </div>
+
+        {/* Steps */}
+        <div className="flex mb-8">
+          {STEPS.map((step, idx) => (
             <button
-              type="button"
-              onClick={() => setFormData({...formData, type: 'SUBLEASE'})}
-              className={`p-4 rounded-xl border-2 text-left transition-all ${
-                formData.type === 'SUBLEASE'
-                  ? 'border-[#FFCB05] bg-[#FFCB05]/5'
-                  : 'border-neutral-200 hover:border-neutral-300 bg-white'
+              key={step}
+              onClick={() => setCurrentStep(idx)}
+              className={`flex-1 py-3 border border-neutral-900 text-center transition-colors ${
+                idx > 0 ? 'border-l-0' : ''
+              } ${
+                idx === currentStep
+                  ? 'bg-neutral-900 text-white'
+                  : 'hover:bg-neutral-100'
               }`}
             >
-              <span className="text-xl mb-1 block">📋</span>
-              <span className="font-semibold text-neutral-900">Sublease</span>
-              <p className="text-xs text-neutral-500 mt-1">
-                Transfer your lease to someone else
-              </p>
+              <p className={`text-xs tracking-wider mb-1 ${idx === currentStep ? 'text-neutral-400' : 'text-neutral-500'}`}>STEP {idx + 1}</p>
+              <p className="text-xs">{step}</p>
             </button>
-            <button
-              type="button"
-              onClick={() => setFormData({...formData, type: 'RENTAL'})}
-              className={`p-4 rounded-xl border-2 text-left transition-all ${
-                formData.type === 'RENTAL'
-                  ? 'border-[#FFCB05] bg-[#FFCB05]/5'
-                  : 'border-neutral-200 hover:border-neutral-300 bg-white'
-              }`}
-            >
-              <span className="text-xl mb-1 block">🏠</span>
-              <span className="font-semibold text-neutral-900">Rental</span>
-              <p className="text-xs text-neutral-500 mt-1">
-                List a property for rent
-              </p>
-            </button>
-          </div>
+          ))}
         </div>
         
-        {/* Basic Info */}
-        <div className="card p-6 space-y-5">
-          <h2 className="text-lg font-semibold text-neutral-900">Basic Information</h2>
+        <form onSubmit={handleSubmit}>
+          {error && (
+            <div className="mb-8 p-4 border border-red-200 bg-red-50 text-red-600 text-sm">
+              {error}
+            </div>
+          )}
           
-          <div>
-            <label className="label">Title</label>
-            <input
-              type="text"
-              value={formData.title}
-              onChange={(e) => setFormData({...formData, title: e.target.value})}
-              placeholder="e.g., Cozy 2BR near Central Campus"
-              required
-              className="input"
-            />
-          </div>
-          
-          <div>
-            <label className="label">Description</label>
-            <textarea
-              value={formData.description}
-              onChange={(e) => setFormData({...formData, description: e.target.value})}
-              placeholder="Describe your place, what's included, the vibe of the area..."
-              required
-              rows={4}
-              className="input"
-            />
-          </div>
-        </div>
-        
-        {/* Location */}
-        <div className="card p-6 space-y-5">
-          <h2 className="text-lg font-semibold text-neutral-900">Location</h2>
-          
-          <div>
-            <label className="label">Street Address</label>
-            <input
-              type="text"
-              value={formData.address}
-              onChange={(e) => setFormData({...formData, address: e.target.value})}
-              placeholder="123 Main Street"
-              required
-              className="input"
-            />
-          </div>
-          
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className="label">City</label>
+          {/* Basic Information */}
+          <div className="border border-neutral-900 p-6 mb-6">
+            <h2 className="text-lg mb-6">Basic Information</h2>
+            
+            {/* Title */}
+            <div className="mb-4">
+              <label className="label">LISTING TITLE</label>
               <input
                 type="text"
-                value={formData.city}
-                onChange={(e) => setFormData({...formData, city: e.target.value})}
+                value={formData.title}
+                onChange={(e) => setFormData({...formData, title: e.target.value})}
+                placeholder="e.g., Spacious 1BR in Downtown"
                 required
-                className="input"
+                className="w-full px-4 py-3 text-sm border border-neutral-900 focus:outline-none"
               />
             </div>
-            <div>
-              <label className="label">State</label>
-              <input
-                type="text"
-                value={formData.state}
-                onChange={(e) => setFormData({...formData, state: e.target.value})}
-                required
-                className="input"
-              />
-            </div>
-            <div>
-              <label className="label">ZIP Code</label>
-              <input
-                type="text"
-                value={formData.zipCode}
-                onChange={(e) => setFormData({...formData, zipCode: e.target.value})}
-                placeholder="48104"
-                required
-                pattern="\d{5}(-\d{4})?"
-                className="input"
-              />
-            </div>
-          </div>
-          
-          <div>
-            <label className="label">Neighborhood <span className="text-neutral-400 font-normal">(optional)</span></label>
-            <input
-              type="text"
-              value={formData.neighborhood}
-              onChange={(e) => setFormData({...formData, neighborhood: e.target.value})}
-              placeholder="e.g., Central Campus, Kerrytown, Burns Park"
-              className="input"
-            />
-          </div>
-        </div>
-        
-        {/* Property Details */}
-        <div className="card p-6 space-y-5">
-          <h2 className="text-lg font-semibold text-neutral-900">Property Details</h2>
-          
-          <div>
-            <label className="label">Property Type</label>
-            <div className="flex flex-wrap gap-2">
-              {PROPERTY_TYPES.map(({ value, label }) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setFormData({...formData, propertyType: value})}
-                  className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                    formData.propertyType === value
-                      ? 'bg-[#00274C] text-white'
-                      : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
-                  }`}
+            
+            {/* Bedrooms & Bathrooms */}
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="label">BEDROOMS</label>
+                <select
+                  value={formData.bedrooms}
+                  onChange={(e) => setFormData({...formData, bedrooms: parseInt(e.target.value)})}
+                  className="w-full px-4 py-3 text-sm border border-neutral-900 focus:outline-none bg-white"
                 >
-                  {label}
-                </button>
+                  <option value="">Select</option>
+                  {[0, 1, 2, 3, 4, 5, 6].map(n => (
+                    <option key={n} value={n}>{n === 0 ? 'Studio' : n}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="label">BATHROOMS</label>
+                <select
+                  value={formData.bathrooms}
+                  onChange={(e) => setFormData({...formData, bathrooms: parseFloat(e.target.value)})}
+                  className="w-full px-4 py-3 text-sm border border-neutral-900 focus:outline-none bg-white"
+                >
+                  <option value="">Select</option>
+                  {[0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4].map(n => (
+                    <option key={n} value={n}>{n}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            
+            {/* Address */}
+            <div className="mb-4">
+              <label className="label">ADDRESS</label>
+              <input
+                type="text"
+                value={formData.address}
+                onChange={(e) => setFormData({...formData, address: e.target.value})}
+                placeholder="Street address"
+                required
+                className="w-full px-4 py-3 text-sm border border-neutral-900 focus:outline-none mb-2"
+              />
+              <div className="flex gap-0">
+                <input
+                  type="text"
+                  value={formData.city}
+                  onChange={(e) => setFormData({...formData, city: e.target.value})}
+                  placeholder="City"
+                  required
+                  className="flex-1 px-4 py-3 text-sm border border-neutral-900 focus:outline-none"
+                />
+                <input
+                  type="text"
+                  value={formData.state}
+                  onChange={(e) => setFormData({...formData, state: e.target.value})}
+                  placeholder="State"
+                  required
+                  className="w-24 px-4 py-3 text-sm border border-neutral-900 border-l-0 focus:outline-none"
+                />
+                <input
+                  type="text"
+                  value={formData.zipCode}
+                  onChange={(e) => setFormData({...formData, zipCode: e.target.value})}
+                  placeholder="ZIP"
+                  required
+                  className="w-24 px-4 py-3 text-sm border border-neutral-900 border-l-0 focus:outline-none"
+                />
+              </div>
+            </div>
+            
+            {/* Description */}
+            <div>
+              <label className="label">DESCRIPTION</label>
+              <textarea
+                value={formData.description}
+                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                placeholder="Describe your apartment..."
+                required
+                rows={4}
+                className="w-full px-4 py-3 text-sm border border-neutral-900 focus:outline-none resize-none"
+              />
+            </div>
+          </div>
+
+          {/* Photos */}
+          <div className="mb-6">
+            <h2 className="text-lg mb-4">Photos</h2>
+            
+            {/* Photo Preview */}
+            <div className="flex gap-0 mb-4">
+              {[1, 2, 3].map((i, idx) => (
+                <div key={i} className={`flex-1 aspect-[4/3] bg-neutral-100 border border-neutral-900 ${idx > 0 ? 'border-l-0' : ''} flex items-center justify-center`}>
+                  <span className="text-neutral-400 text-xs tracking-wider">[PHOTO {i}]</span>
+                </div>
               ))}
             </div>
-          </div>
-          
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className="label">Bedrooms</label>
-              <select
-                value={formData.bedrooms}
-                onChange={(e) => setFormData({...formData, bedrooms: parseInt(e.target.value)})}
-                className="input"
-              >
-                {[0, 1, 2, 3, 4, 5, 6].map(n => (
-                  <option key={n} value={n}>{n === 0 ? 'Studio' : n}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="label">Bathrooms</label>
-              <select
-                value={formData.bathrooms}
-                onChange={(e) => setFormData({...formData, bathrooms: parseFloat(e.target.value)})}
-                className="input"
-              >
-                {[0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4].map(n => (
-                  <option key={n} value={n}>{n}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="label">Sq Ft <span className="text-neutral-400 font-normal">(optional)</span></label>
-              <input
-                type="number"
-                value={formData.sqft}
-                onChange={(e) => setFormData({...formData, sqft: e.target.value})}
-                placeholder="800"
-                className="input"
-              />
+            
+            {/* Upload */}
+            <div className="border-2 border-dashed border-neutral-900 p-6 text-center">
+              <svg className="w-5 h-5 mx-auto mb-2 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+              <p className="text-xs tracking-wider mb-1">UPLOAD PHOTOS</p>
+              <p className="text-xs text-neutral-500">PNG, JPG up to 10MB</p>
             </div>
           </div>
-        </div>
-        
-        {/* Pricing */}
-        <div className="card p-6 space-y-5">
-          <h2 className="text-lg font-semibold text-neutral-900">Pricing</h2>
-          
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className="label">Monthly Rent</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 font-medium">$</span>
-                <input
-                  type="number"
-                  value={formData.rent}
-                  onChange={(e) => setFormData({...formData, rent: e.target.value})}
-                  placeholder="1200"
-                  required
-                  min="1"
-                  className="input pl-7"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="label">Deposit <span className="text-neutral-400 font-normal">(optional)</span></label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 font-medium">$</span>
-                <input
-                  type="number"
-                  value={formData.deposit}
-                  onChange={(e) => setFormData({...formData, deposit: e.target.value})}
-                  placeholder="1200"
-                  className="input pl-7"
-                />
-              </div>
-            </div>
-            {formData.type === 'SUBLEASE' && (
-              <div>
-                <label className="label">Sublease Fee <span className="text-neutral-400 font-normal">(optional)</span></label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 font-medium">$</span>
+
+          {/* Dates & Pricing */}
+          <div className="border border-neutral-900 p-6 mb-6">
+            <h2 className="text-lg mb-6">Dates & Pricing</h2>
+            
+            <div className="border-b border-neutral-200 pb-6 mb-6">
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="label">AVAILABLE FROM</label>
                   <input
-                    type="number"
-                    value={formData.subleaseFee}
-                    onChange={(e) => setFormData({...formData, subleaseFee: e.target.value})}
-                    placeholder="0"
-                    className="input pl-7"
+                    type="date"
+                    value={formData.moveInDate}
+                    onChange={(e) => setFormData({...formData, moveInDate: e.target.value})}
+                    required
+                    className="w-full px-4 py-3 text-sm border border-neutral-900 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="label">AVAILABLE UNTIL</label>
+                  <input
+                    type="date"
+                    value={formData.leaseEndDate}
+                    onChange={(e) => setFormData({...formData, leaseEndDate: e.target.value})}
+                    required
+                    className="w-full px-4 py-3 text-sm border border-neutral-900 focus:outline-none"
                   />
                 </div>
               </div>
-            )}
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={formData.utilitiesIncluded}
-                onChange={(e) => setFormData({...formData, utilitiesIncluded: e.target.checked})}
-              />
-              <span className="text-sm font-medium text-neutral-700">Utilities included in rent</span>
-            </label>
-          </div>
-          
-          <div>
-            <label className="label">Utilities Notes <span className="text-neutral-400 font-normal">(optional)</span></label>
-            <input
-              type="text"
-              value={formData.utilitiesNotes}
-              onChange={(e) => setFormData({...formData, utilitiesNotes: e.target.value})}
-              placeholder="e.g., Water included, electric ~$50/mo"
-              className="input"
-            />
-          </div>
-        </div>
-        
-        {/* Dates & Terms */}
-        <div className="card p-6 space-y-5">
-          <h2 className="text-lg font-semibold text-neutral-900">Dates & Terms</h2>
-          
-          <div>
-            <label className="label">Available Terms <span className="text-red-500">*</span></label>
-            <div className="flex flex-wrap gap-2">
-              {TERM_TAGS.map(({ value, label }) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => toggleTermTag(value)}
-                  className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                    formData.termTags.includes(value)
-                      ? 'bg-[#FFCB05] text-[#00274C]'
-                      : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="label">MONTHLY RENT</label>
+                  <input
+                    type="text"
+                    value={formData.rent}
+                    onChange={(e) => setFormData({...formData, rent: e.target.value})}
+                    placeholder="$1,200"
+                    required
+                    className="w-full px-4 py-3 text-sm border border-neutral-900 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="label">SECURITY DEPOSIT</label>
+                  <input
+                    type="text"
+                    value={formData.deposit}
+                    onChange={(e) => setFormData({...formData, deposit: e.target.value})}
+                    placeholder="$1,000"
+                    className="w-full px-4 py-3 text-sm border border-neutral-900 focus:outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+            
+            {/* Amenities */}
+            <h3 className="text-base mb-4">Amenities</h3>
+            <div className="grid grid-cols-2 gap-x-8 gap-y-3">
+              <div className="space-y-3">
+                {AMENITIES_LEFT.map(amenity => (
+                  <label key={amenity} className="flex items-center gap-3 cursor-pointer">
+                    <input 
+                      type="checkbox"
+                      checked={formData.amenities.includes(amenity)}
+                      onChange={() => toggleAmenity(amenity)}
+                      className="w-4 h-4 border-neutral-900 accent-neutral-900"
+                    />
+                    <span className="text-sm">{amenity}</span>
+                  </label>
+                ))}
+              </div>
+              <div className="space-y-3">
+                {AMENITIES_RIGHT.map(amenity => (
+                  <label key={amenity} className="flex items-center gap-3 cursor-pointer">
+                    <input 
+                      type="checkbox"
+                      checked={formData.amenities.includes(amenity)}
+                      onChange={() => toggleAmenity(amenity)}
+                      className="w-4 h-4 border-neutral-900 accent-neutral-900"
+                    />
+                    <span className="text-sm">{amenity}</span>
+                  </label>
+                ))}
+              </div>
             </div>
           </div>
           
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="label">Move-in Date</label>
-              <input
-                type="date"
-                value={formData.moveInDate}
-                onChange={(e) => setFormData({...formData, moveInDate: e.target.value})}
-                required
-                className="input"
-              />
-            </div>
-            <div>
-              <label className="label">Lease End Date</label>
-              <input
-                type="date"
-                value={formData.leaseEndDate}
-                onChange={(e) => setFormData({...formData, leaseEndDate: e.target.value})}
-                required
-                className="input"
-              />
-            </div>
+          {/* Submit Buttons */}
+          <div className="flex gap-0">
+            <button
+              type="button"
+              className="flex-1 py-3 border border-neutral-900 text-xs tracking-wider hover:bg-neutral-100 transition-colors"
+            >
+              SAVE DRAFT
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 py-3 bg-neutral-900 border border-neutral-900 text-white text-xs tracking-wider hover:bg-neutral-800 transition-colors disabled:opacity-50"
+            >
+              {loading ? 'PUBLISHING...' : 'PUBLISH LISTING'}
+            </button>
           </div>
-          
-          <div>
-            <label className="label">Flexible Move-in Window <span className="text-neutral-400 font-normal">(optional)</span></label>
-            <div className="grid grid-cols-2 gap-4">
-              <input
-                type="date"
-                value={formData.moveInWindowStart}
-                onChange={(e) => setFormData({...formData, moveInWindowStart: e.target.value})}
-                placeholder="Earliest"
-                className="input"
-              />
-              <input
-                type="date"
-                value={formData.moveInWindowEnd}
-                onChange={(e) => setFormData({...formData, moveInWindowEnd: e.target.value})}
-                placeholder="Latest"
-                className="input"
-              />
-            </div>
-          </div>
-        </div>
-        
-        {/* Amenities */}
-        <div className="card p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-neutral-900">Amenities</h2>
-          <div className="flex flex-wrap gap-2">
-            {AMENITIES.map(amenity => (
-              <button
-                key={amenity}
-                type="button"
-                onClick={() => toggleAmenity(amenity)}
-                className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${
-                  formData.amenities.includes(amenity)
-                    ? 'bg-[#00274C] text-white'
-                    : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
-                }`}
-              >
-                {amenity}
-              </button>
-            ))}
-          </div>
-        </div>
-        
-        {/* Submit */}
-        <div className="pt-2">
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn btn-primary w-full py-3.5 text-base"
-          >
-            {loading ? 'Creating Listing...' : 'Create Listing'}
-          </button>
-          <p className="mt-3 text-xs text-neutral-500 text-center">
-            By posting, you agree to our terms of service. Listings expire after 30 days unless renewed.
-          </p>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   )
 }

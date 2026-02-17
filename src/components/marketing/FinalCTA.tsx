@@ -7,27 +7,30 @@ export default function FinalCTA() {
   const { finalCTA } = homeContent
 
   return (
-    <section className="py-20 bg-gradient-to-br from-[#FFCB05] to-[#F5B800] relative overflow-hidden">
-      {/* Background pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2300274C' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }} />
-      </div>
+    <section className="py-24 bg-gradient-to-br from-neutral-50 via-white to-amber-50/30 relative overflow-hidden">
+      {/* Decorative gradient orbs */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-br from-[#FFCB05]/10 via-transparent to-[#00274C]/5 rounded-full blur-3xl" />
 
       <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#00274C]">
+        {/* Icon */}
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-gradient-to-br from-[#FFCB05] to-[#F5B800] mb-8 shadow-lg shadow-[#FFCB05]/30">
+          <svg className="w-8 h-8 text-[#00274C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+        </div>
+
+        <h2 className="text-4xl sm:text-5xl font-bold text-neutral-900 tracking-tight">
           {finalCTA.headline}
         </h2>
         
-        <p className="mt-6 text-xl text-[#00274C]/80 max-w-2xl mx-auto">
+        <p className="mt-6 text-xl text-neutral-600 max-w-2xl mx-auto">
           {finalCTA.description}
         </p>
 
         <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
           <Link
             href={finalCTA.primaryCTA.href}
-            className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold rounded-xl bg-[#00274C] text-white hover:bg-[#1E3A5F] transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+            className="inline-flex items-center justify-center px-8 py-4 text-base font-semibold rounded-full bg-[#00274C] text-white hover:bg-[#1E3A5F] transition-all shadow-lg shadow-[#00274C]/20 hover:shadow-xl hover:-translate-y-0.5"
           >
             {finalCTA.primaryCTA.text}
             <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -36,13 +39,17 @@ export default function FinalCTA() {
           </Link>
           <Link
             href={finalCTA.secondaryCTA.href}
-            className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold rounded-xl border-2 border-[#00274C]/30 text-[#00274C] hover:bg-[#00274C]/10 transition-all"
+            className="inline-flex items-center justify-center px-8 py-4 text-base font-semibold rounded-full bg-white text-neutral-900 border border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50 transition-all"
           >
             {finalCTA.secondaryCTA.text}
           </Link>
         </div>
+
+        {/* Trust note */}
+        <p className="mt-12 text-sm text-neutral-400">
+          Free to use • No credit card required • Verified community
+        </p>
       </div>
     </section>
   )
 }
-

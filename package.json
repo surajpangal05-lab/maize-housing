@@ -10,7 +10,11 @@
     "db:seed": "npx tsx prisma/seed.ts",
     "db:reset": "npx prisma migrate reset --force && npm run db:seed",
     "db:push": "npx prisma db push",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "scraper:sync": "cd lease-scraper/apps/scraper && SKIP_IMAGE_DOWNLOAD=true npx tsx src/cli/index.ts sync --source michiganrental --limit 0",
+    "scraper:contacts": "cd lease-scraper/apps/scraper && npx tsx src/cli/index.ts scrape-contacts --limit 0",
+    "scraper:api": "cd lease-scraper && npm run api:dev",
+    "scraper:full-sync": "npm run scraper:sync && npm run scraper:contacts"
   },
   "dependencies": {
     "@prisma/client": "5.22.0",

@@ -1,0 +1,18 @@
+{
+  "source": "michiganrental",
+  "targetUrl": "https://www.michiganrental.com/all-properties-map-listings",
+  "endpoints": [
+    {
+      "url": "https://www.michiganrental.com/_api/dynamic-pages-router/v1/pages?H4sIAAAAAAAAA41SwW7bMAz9lUDYYQPixnGT2Mmthw0osG7B0vawYgdZol1hsuhSct0uyL+XspdmBYZhF4MyyfceH7kXHdmtJNl4sdmLmoy+aNtLLTZCL7N5qosiKaoiSxbZSidFvsoSnafnUhWLRb5OxVQ8GuivUAN3eBNAHKaiRP0c0Qi7ALQlqMwTp2fS2qQlbIGCAZ80sk2s8cG42jOQQleZOva1MnCfGxTN4scDXkGQ17L2I26JgSNhnIanyHjqVWgtqGDQcf7C2u0r3+cTlcUeSEnPogN1MGXGGnbmF78XaTqNfLfZMVcZy2oi9jvp2Jg7Fog+XON3YxloPmTgYSw/HH6wHI8UxsKR/fmLbKJB0itWuxclaEKMlgsN8V9sihq+oY11AGwvyJKtXyq2/lwmJahVkhW5KtdlLterOY8RTBjK/z7m4fAH6ODbf8FynYnrhwrd8i3J5MQyOdJM3sfogxipbsjsPn6Nk75d9XHNQyCiMIKHDny4dBUO0twjd5WEvWev2XSk5pNUAWn06GfANi56PKldV/0+qVjaWXtDll/3IbR+M5v1fX/WGHVvaukIXJD2TGHzr/OLOMQ23UoyMh5P9IsNfAHl5h80HwMAAA==",
+      "method": "GET",
+      "headers": {
+        "authorization": "8sbT76XqIAe7vSIhZpbiGfQOPVzKKnppTSj9zSi8v4w.eyJpbnN0YW5jZUlkIjoiMGNlN2YxYjctNjRmYy00ODA5LThkNDktZTRiMWJjZDE2YWNjIiwiYXBwRGVmSWQiOiJlNTkzYjBiZC1iNzgzLTQ1YjgtOTdjMi04NzNkNDJhYWNhZjQiLCJtZXRhU2l0ZUlkIjoiMWFiOTc5ODAtZmFkNC00OTVkLWI5ZTgtMDAwZTIwYTdmYzAxIiwic2lnbkRhdGUiOiIyMDI2LTAyLTE3VDA1OjQyOjQ3Ljk3NFoiLCJkZW1vTW9kZSI6ZmFsc2UsImFpZCI6ImViNGNhMjhkLTIwMzQtNDBiZC1iMTZhLTllYjVmOWI2NDUxNSIsImJpVG9rZW4iOiIxNjVlODgzNy05ZTI4LTAxNTQtMzRhMS1lNGJmOWM3Njk2Y2QiLCJzaXRlT3duZXJJZCI6ImQ0OWM0ODZmLTRiNDAtNDBiNi05MTdmLTk3NWI4OWNlM2IyMSIsImJzIjoicGx1Qmdicnk0bmM3Sk44Wkl4Q1YtYkFZdk5iS3dMOVRlUVFnczRtOG9FOCIsInNjZCI6IjIwMjMtMTItMTRUMTg6NDE6MTYuNjk0WiJ9",
+        "content-type": "application/json"
+      },
+      "paginationType": "none",
+      "listingsPath": "result.data.items",
+      "sampleCount": 257,
+      "discoveredAt": "2026-02-17T05:43:47.048Z"
+    }
+  ]
+}

@@ -7,39 +7,40 @@ export default function HowItWorks() {
   const { howItWorks } = homeContent
 
   return (
-    <section id="how" className="py-20 bg-white">
+    <section id="how" className="py-24 bg-neutral-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-neutral-900">
+        <div className="text-center mb-16">
+          <p className="text-sm font-semibold text-[#FFCB05] uppercase tracking-wider mb-3">How It Works</p>
+          <h2 className="text-4xl sm:text-5xl font-bold text-neutral-900 tracking-tight">
             {howItWorks.headline}
           </h2>
-          <p className="mt-4 text-lg text-neutral-600">
+          <p className="mt-4 text-lg text-neutral-600 max-w-2xl mx-auto">
             {howItWorks.subheadline}
           </p>
         </div>
 
-        <div className="mt-16 grid sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {howItWorks.steps.map((step, index) => (
-            <div key={index} className="relative">
-              {/* Connector line (hidden on mobile, visible on lg) */}
+            <div key={index} className="relative text-center">
+              {/* Connector line */}
               {index < howItWorks.steps.length - 1 && (
-                <div className="hidden lg:block absolute top-8 left-1/2 w-full h-0.5 bg-gradient-to-r from-[#FFCB05] to-[#FFCB05]/30" />
+                <div className="hidden lg:block absolute top-10 left-1/2 w-full h-[2px] bg-gradient-to-r from-[#FFCB05] to-[#FFCB05]/20" />
               )}
               
-              <div className="relative flex flex-col items-center text-center">
-                {/* Step number */}
-                <div className="relative z-10 w-16 h-16 rounded-full bg-gradient-to-br from-[#00274C] to-[#1E3A5F] flex items-center justify-center shadow-lg">
-                  <span className="text-2xl font-bold text-[#FFCB05]">{step.number}</span>
-                </div>
-                
-                <h3 className="mt-6 text-xl font-semibold text-neutral-900">
-                  {step.title}
-                </h3>
-                
-                <p className="mt-3 text-neutral-600 leading-relaxed max-w-xs">
-                  {step.description}
-                </p>
+              {/* Step number */}
+              <div className="relative z-10 inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-white shadow-lg shadow-neutral-200/50 border border-neutral-100 mb-6">
+                <span className="text-3xl font-bold bg-gradient-to-br from-[#00274C] to-[#1E3A5F] bg-clip-text text-transparent">
+                  {step.number}
+                </span>
               </div>
+              
+              <h3 className="text-xl font-bold text-neutral-900 mb-3">
+                {step.title}
+              </h3>
+              
+              <p className="text-neutral-600 leading-relaxed">
+                {step.description}
+              </p>
             </div>
           ))}
         </div>
@@ -47,7 +48,7 @@ export default function HowItWorks() {
         <div className="mt-16 text-center">
           <Link
             href={howItWorks.cta.href}
-            className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold rounded-xl bg-[#00274C] text-white hover:bg-[#1E3A5F] transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+            className="inline-flex items-center justify-center px-8 py-4 text-base font-semibold rounded-full bg-[#00274C] text-white hover:bg-[#1E3A5F] transition-all shadow-lg shadow-[#00274C]/20 hover:shadow-xl hover:-translate-y-0.5"
           >
             {howItWorks.cta.text}
             <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -59,4 +60,3 @@ export default function HowItWorks() {
     </section>
   )
 }
-

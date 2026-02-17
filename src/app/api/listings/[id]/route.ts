@@ -4,6 +4,89 @@ import { prisma } from '@/lib/prisma'
 import { listingSchema } from '@/lib/validations'
 import { getExpirationDate } from '@/lib/utils'
 
+const SCRAPER_API_URL = process.env.SCRAPER_API_URL || 'http://localhost:3002'
+
+// Fetch a scraped listing from the scraper API
+async function fetchScrapedListing(scrapedId: string) {
+  try {
+    const response = await fetch(`${SCRAPER_API_URL}/listings/${scrapedId}`)
+    
+    if (!response.ok) return null
+    
+    const data = await response.json()
+    const scraped = data.data
+    
+    if (!scraped) return null
+    
+    // Get ALL images from the scraped listing
+    const images = scraped.images?.map((img: { originalUrl: string; storedUrl: string | null }) => 
+      img.originalUrl || img.storedUrl
+    ).filter(Boolean) || []
+    
+    // Only include fields that actually have data - don't hallucinate
+    const hasAddress = scraped.street || scraped.unit
+    const hasCity = scraped.city
+    const hasState = scraped.state
+    
+    // Parse contact info if available
+    const contact = scraped.contactJson as { phone?: string; email?: string; name?: string } | null
+    
+    return {
+      id: `scraped_${scraped.id}`,
+      userId: null,
+      type: 'RENTAL',
+      status: 'ACTIVE',
+      title: scraped.title || (scraped.beds ? `${scraped.beds} BR` : 'Rental') + (hasCity ? ` in ${scraped.city}` : ''),
+      description: scraped.description || null,
+      address: hasAddress ? [scraped.street, scraped.unit].filter(Boolean).join(', ') : null,
+      city: hasCity ? scraped.city : null,
+      state: hasState ? scraped.state : null,
+      zipCode: scraped.zip || null,
+      neighborhood: null,
+      propertyType: scraped.propertyType?.toUpperCase() || null,
+      bedrooms: scraped.beds,
+      bathrooms: scraped.baths,
+      sqft: scraped.sqft,
+      rent: scraped.priceMin || scraped.priceMax || null,
+      deposit: scraped.deposit,
+      subleaseFee: null,
+      utilitiesIncluded: null,
+      utilitiesNotes: null,
+      termTags: '',
+      moveInDate: scraped.availabilityDate || null,
+      moveInWindowStart: null,
+      moveInWindowEnd: null,
+      leaseEndDate: null,
+      amenities: scraped.amenitiesJson ? JSON.stringify(scraped.amenitiesJson) : null,
+      images: images.length > 0 ? JSON.stringify(images) : null,
+      createdAt: scraped.createdAt,
+      updatedAt: scraped.updatedAt,
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      lastActivityAt: scraped.scrapedAt,
+      renewedAt: null,
+      viewCount: 0,
+      // Contact info from scraper
+      contactPhone: contact?.phone || null,
+      contactEmail: contact?.email || null,
+      contactName: contact?.name || null,
+      user: {
+        id: 'scraped',
+        email: contact?.email || 'listings@maizeleasing.com',
+        name: contact?.name || 'Property Manager',
+        userType: 'LANDLORD',
+        emailVerified: new Date().toISOString(),
+        phoneVerified: null,
+        isUmichEmail: false,
+        lastActiveAt: scraped.scrapedAt,
+        successfulTransitions: 0,
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching scraped listing:', error)
+    return null
+  }
+}
+
 // Get a single listing
 export async function GET(
   request: Request,
@@ -11,6 +94,24 @@ export async function GET(
 ) {
   try {
     const { id } = await params
+    
+    // Check if this is a scraped listing
+    if (id.startsWith('scraped_')) {
+      const scrapedId = id.replace('scraped_', '')
+      const listing = await fetchScrapedListing(scrapedId)
+      
+      if (!listing) {
+        return NextResponse.json(
+          { success: false, error: 'Listing not found' },
+          { status: 404 }
+        )
+      }
+      
+      return NextResponse.json({
+        success: true,
+        listing,
+      })
+    }
     
     const listing = await prisma.listing.findUnique({
       where: { id },

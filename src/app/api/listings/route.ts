@@ -5,6 +5,127 @@ import { listingSchema } from '@/lib/validations'
 import { getExpirationDate, getVerificationBadge } from '@/lib/utils'
 import { UserType } from '@/lib/types'
 
+const SCRAPER_API_URL = process.env.SCRAPER_API_URL || 'http://localhost:3002'
+
+// Fetch scraped listings from the scraper API
+async function fetchScrapedListings(searchParams: URLSearchParams) {
+  try {
+    const params = new URLSearchParams()
+    
+    const page = searchParams.get('page') || '1'
+    const limit = searchParams.get('limit') || '20'
+    params.set('page', page)
+    params.set('limit', limit)
+    
+    if (searchParams.get('city')) params.set('city', searchParams.get('city')!)
+    if (searchParams.get('minRent')) params.set('minPrice', searchParams.get('minRent')!)
+    if (searchParams.get('maxRent')) params.set('maxPrice', searchParams.get('maxRent')!)
+    if (searchParams.get('bedrooms')) params.set('beds', searchParams.get('bedrooms')!)
+    if (searchParams.get('query')) params.set('q', searchParams.get('query')!)
+    
+    const response = await fetch(`${SCRAPER_API_URL}/listings?${params.toString()}`, {
+      next: { revalidate: 300 },
+    })
+    
+    if (!response.ok) return { listings: [], total: 0 }
+    
+    const data = await response.json()
+    
+    // Transform to our format
+    const listings = data.data.map((scraped: {
+      id: string
+      title: string | null
+      description: string | null
+      street: string | null
+      unit: string | null
+      city: string | null
+      state: string | null
+      zip: string | null
+      beds: number | null
+      baths: number | null
+      sqft: number | null
+      priceMin: number | null
+      priceMax: number | null
+      propertyType: string | null
+      availabilityDate: string | null
+      deposit: number | null
+      amenitiesJson: unknown
+      contactJson: { phone?: string; email?: string; name?: string } | null
+      canonicalUrl: string
+      createdAt: string
+      updatedAt: string
+      scrapedAt: string
+      images: { originalUrl: string; storedUrl: string | null }[]
+      source: { name: string }
+    }) => {
+      // Get ALL images, not just the first one
+      const images = scraped.images?.map((img: { originalUrl: string; storedUrl: string | null }) => img.originalUrl || img.storedUrl).filter(Boolean) || []
+      
+      // Only include fields that actually have data - don't hallucinate
+      const hasAddress = scraped.street || scraped.unit
+      const hasCity = scraped.city
+      const hasState = scraped.state
+      
+      return {
+        id: `scraped_${scraped.id}`,
+        userId: null,
+        type: 'RENTAL',
+        status: 'ACTIVE',
+        // Only use title if it exists, otherwise create a simple one from available data
+        title: scraped.title || (scraped.beds ? `${scraped.beds} BR` : 'Rental') + (hasCity ? ` in ${scraped.city}` : ''),
+        description: scraped.description || null,
+        address: hasAddress ? [scraped.street, scraped.unit].filter(Boolean).join(', ') : null,
+        city: hasCity ? scraped.city : null,
+        state: hasState ? scraped.state : null,
+        zipCode: scraped.zip || null,
+        neighborhood: null,
+        propertyType: scraped.propertyType?.toUpperCase() || null,
+        bedrooms: scraped.beds,
+        bathrooms: scraped.baths,
+        sqft: scraped.sqft,
+        rent: scraped.priceMin || scraped.priceMax || null,
+        deposit: scraped.deposit,
+        subleaseFee: null,
+        utilitiesIncluded: null,
+        utilitiesNotes: null,
+        termTags: '',
+        moveInDate: scraped.availabilityDate || null,
+        moveInWindowStart: null,
+        moveInWindowEnd: null,
+        leaseEndDate: null,
+        amenities: scraped.amenitiesJson ? JSON.stringify(scraped.amenitiesJson) : null,
+        images: images.length > 0 ? JSON.stringify(images) : null,
+        createdAt: scraped.createdAt,
+        updatedAt: scraped.updatedAt,
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        lastActivityAt: scraped.scrapedAt,
+        renewedAt: null,
+        viewCount: 0,
+        // Contact info from scraper
+        contactPhone: scraped.contactJson?.phone || null,
+        contactEmail: scraped.contactJson?.email || null,
+        contactName: scraped.contactJson?.name || null,
+        user: {
+          id: 'scraped',
+          email: 'listings@maizeleasing.com',
+          name: scraped.contactJson?.name || 'Property Manager',
+          userType: 'LANDLORD',
+          emailVerified: new Date().toISOString(),
+          phoneVerified: null,
+          isUmichEmail: false,
+          lastActiveAt: scraped.scrapedAt,
+          successfulTransitions: 0,
+        }
+      }
+    })
+    
+    return { listings, total: data.pagination.total }
+  } catch (error) {
+    console.error('Error fetching scraped listings:', error)
+    return { listings: [], total: 0 }
+  }
+}
+
 // Get all listings with filters
 export async function GET(request: Request) {
   try {
@@ -21,6 +142,7 @@ export async function GET(request: Request) {
     const moveInEnd = searchParams.get('moveInEnd')
     const neighborhood = searchParams.get('neighborhood')
     const verifiedOnly = searchParams.get('verifiedOnly') === 'true'
+    const includeScraped = searchParams.get('includeScraped') !== 'false' // Default to true
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
 
@@ -117,14 +239,29 @@ export async function GET(request: Request) {
 
     const total = await prisma.listing.count({ where })
 
+    // Fetch scraped listings if enabled and type is not SUBLEASE
+    let allListings = [...listings]
+    let scrapedTotal = 0
+    
+    if (includeScraped && type !== 'SUBLEASE') {
+      const scraped = await fetchScrapedListings(searchParams)
+      scrapedTotal = scraped.total
+      
+      // Combine user listings with scraped listings
+      // User listings first, then scraped
+      allListings = [...allListings, ...scraped.listings]
+    }
+
     return NextResponse.json({
       success: true,
-      listings,
+      listings: allListings,
       pagination: {
         page,
         limit,
-        total,
-        totalPages: Math.ceil(total / limit),
+        total: total + scrapedTotal,
+        totalPages: Math.ceil((total + scrapedTotal) / limit),
+        userListingsTotal: total,
+        scrapedListingsTotal: scrapedTotal,
       },
     })
   } catch (error) {

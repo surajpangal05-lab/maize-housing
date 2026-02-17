@@ -1,0 +1,25 @@
+{
+  "name": "michigan-rental-ingest",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "eslint . --ext .ts",
+    "db:migrate": "npx prisma migrate dev --schema=packages/shared/prisma/schema.prisma",
+    "db:migrate:prod": "npx prisma migrate deploy --schema=packages/shared/prisma/schema.prisma",
+    "db:generate": "npx prisma generate --schema=packages/shared/prisma/schema.prisma",
+    "db:studio": "npx prisma studio --schema=packages/shared/prisma/schema.prisma",
+    "api": "npm run start --workspace=apps/api",
+    "api:dev": "npm run dev --workspace=apps/api",
+    "discover": "npm run discover --workspace=apps/scraper",
+    "sync": "npm run sync --workspace=apps/scraper"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

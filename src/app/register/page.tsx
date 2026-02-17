@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -33,7 +34,6 @@ export default function RegisterPage() {
       return
     }
     
-    // Check for @umich.edu email for students
     if (formData.userType === 'STUDENT' && !formData.email.toLowerCase().endsWith('@umich.edu')) {
       setError('Students must register with a @umich.edu email address')
       return
@@ -70,38 +70,59 @@ export default function RegisterPage() {
   
   if (success) {
     return (
-      <div className="min-h-[calc(100vh-64px)] flex items-center justify-center px-4 py-12 bg-neutral-50">
-        <div className="w-full max-w-md">
-          <div className="card p-8 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
-              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+      <div className="min-h-screen bg-white">
+        <div className="border-b border-neutral-200">
+          <div className="max-w-md mx-auto px-4 py-4">
+            <Link href="/" className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors">
+              ← Back to Home
+            </Link>
+          </div>
+        </div>
+
+        <div className="max-w-md mx-auto px-4 py-16">
+          <div className="text-center mb-12">
+            <Image
+              src="/logo.png"
+              alt="MaizeLease"
+              width={160}
+              height={53}
+              className="h-12 w-auto mx-auto grayscale"
+            />
+          </div>
+
+          <div className="border border-neutral-200 p-8 text-center">
+            <div className="w-16 h-16 border border-neutral-900 flex items-center justify-center mx-auto mb-6">
+              <svg className="w-8 h-8 text-neutral-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h1 className="text-2xl font-bold text-neutral-900">Check your email!</h1>
-            <p className="mt-2 text-neutral-500">
-              We&apos;ve sent a verification link to <strong className="text-neutral-700">{formData.email}</strong>
+            <h1 className="text-2xl font-serif text-neutral-900 mb-2">Check your email</h1>
+            <p className="text-neutral-500 text-sm mb-6">
+              We&apos;ve sent a verification link to <strong className="text-neutral-900">{formData.email}</strong>
             </p>
             
-            {/* Demo mode - show verification token */}
-            <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg text-left">
-              <p className="text-sm font-semibold text-amber-800 mb-2">🔧 Demo Mode</p>
-              <p className="text-sm text-amber-700 mb-3">
-                In production, you&apos;d receive an email. For testing, use this token:
+            {/* Demo mode */}
+            <div className="border border-dashed border-neutral-300 p-6 text-left mb-6">
+              <p className="text-xs font-mono text-neutral-500 tracking-wider mb-3">DEMO MODE</p>
+              <p className="text-sm text-neutral-600 mb-4">
+                In production, you&apos;d receive an email. For testing:
               </p>
-              <code className="block bg-amber-100 px-3 py-2 rounded text-amber-900 font-mono text-sm break-all">
+              <code className="block bg-neutral-100 px-4 py-3 text-xs font-mono text-neutral-700 break-all">
                 {verificationToken}
               </code>
               <Link 
                 href={`/verify-email?token=${verificationToken}`}
-                className="mt-3 inline-block text-sm font-semibold text-amber-700 hover:text-amber-800"
+                className="mt-4 inline-block text-sm text-neutral-900 hover:underline"
               >
                 Click here to verify →
               </Link>
             </div>
             
-            <Link href="/login" className="btn btn-primary mt-6">
-              Continue to Login
+            <Link 
+              href="/login" 
+              className="inline-block px-6 py-3 bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-800 transition-colors"
+            >
+              CONTINUE TO LOGIN
             </Link>
           </div>
         </div>
@@ -110,90 +131,105 @@ export default function RegisterPage() {
   }
   
   return (
-    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center px-4 py-12 bg-neutral-50">
-      <div className="w-full max-w-md">
-        <div className="card p-8">
-          <div className="text-center mb-8">
-            <img src="/logo.png" alt="MaizeLease" className="h-[67px] mx-auto mb-6" />
-            <h1 className="text-2xl font-bold text-neutral-900">Create your account</h1>
-            <p className="mt-2 text-neutral-500">Join the MaizeLease community</p>
-          </div>
+    <div className="min-h-screen bg-white">
+      <div className="border-b border-neutral-200">
+        <div className="max-w-5xl mx-auto px-8 py-3">
+          <Link href="/" className="text-xs text-neutral-500 hover:text-neutral-900">
+            ← Back to Home
+          </Link>
+        </div>
+      </div>
+
+      <div className="max-w-sm mx-auto px-8 py-12">
+        <div className="text-center mb-12">
+          <Image
+            src="/logo.png"
+            alt="MaizeLease"
+            width={160}
+            height={53}
+            className="h-12 w-auto mx-auto grayscale"
+          />
+        </div>
+
+        <div className="border border-neutral-900 p-6">
+          <h1 className="text-3xl font-serif text-neutral-900 mb-2">Create Account</h1>
+          <p className="text-neutral-500 text-sm mb-8">Join the MaizeLease community</p>
           
           {/* User Type Selection */}
           <div className="mb-6">
-            <label className="label">I am a...</label>
-            <div className="grid grid-cols-2 gap-3">
+            <label className="label">I AM A...</label>
+            <div className="grid grid-cols-2 gap-0">
               <button
                 type="button"
                 onClick={() => setFormData({...formData, userType: 'STUDENT'})}
-                className={`p-4 rounded-xl border-2 text-left transition-all ${
+                className={`p-4 border border-neutral-900 text-left transition-colors ${
                   formData.userType === 'STUDENT'
-                    ? 'border-[#FFCB05] bg-[#FFCB05]/5'
-                    : 'border-neutral-200 hover:border-neutral-300 bg-white'
+                    ? 'bg-neutral-900 text-white'
+                    : 'hover:bg-neutral-100'
                 }`}
               >
-                <span className="text-2xl mb-2 block">🎓</span>
-                <span className="font-semibold text-neutral-900">Student</span>
-                <p className="text-xs text-neutral-500 mt-1">
-                  Requires @umich.edu email
+                <span className="text-lg mb-1 block">🎓</span>
+                <span className={`text-sm ${formData.userType === 'STUDENT' ? 'text-white' : 'text-neutral-900'}`}>Student</span>
+                <p className={`text-xs mt-1 ${formData.userType === 'STUDENT' ? 'text-neutral-300' : 'text-neutral-500'}`}>
+                  @umich.edu email
                 </p>
               </button>
               <button
                 type="button"
                 onClick={() => setFormData({...formData, userType: 'LANDLORD'})}
-                className={`p-4 rounded-xl border-2 text-left transition-all ${
+                className={`p-4 border border-neutral-900 border-l-0 text-left transition-colors ${
                   formData.userType === 'LANDLORD'
-                    ? 'border-[#FFCB05] bg-[#FFCB05]/5'
-                    : 'border-neutral-200 hover:border-neutral-300 bg-white'
+                    ? 'bg-neutral-900 text-white'
+                    : 'hover:bg-neutral-100'
                 }`}
               >
-                <span className="text-2xl mb-2 block">🏠</span>
-                <span className="font-semibold text-neutral-900">Landlord</span>
-                <p className="text-xs text-neutral-500 mt-1">
-                  Email + phone verification
+                <span className="text-lg mb-1 block">🏠</span>
+                <span className={`text-sm ${formData.userType === 'LANDLORD' ? 'text-white' : 'text-neutral-900'}`}>Landlord</span>
+                <p className={`text-xs mt-1 ${formData.userType === 'LANDLORD' ? 'text-neutral-300' : 'text-neutral-500'}`}>
+                  Email + phone
                 </p>
               </button>
             </div>
           </div>
           
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="alert alert-error">
+              <div className="p-3 border border-red-500 text-red-600 text-xs">
                 {error}
               </div>
             )}
             
             <div>
-              <label className="label">Full Name</label>
+              <label className="label">FULL NAME</label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
                 placeholder="Your name"
                 required
-                className="input"
+                className="w-full px-4 py-3 text-sm border border-neutral-900 focus:outline-none"
               />
             </div>
             
             <div>
-              <label className="label">Email</label>
+              <label className="label">EMAIL</label>
               <input
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({...formData, email: e.target.value})}
                 placeholder={formData.userType === 'STUDENT' ? 'uniqname@umich.edu' : 'you@email.com'}
                 required
-                className="input"
+                className="w-full px-4 py-3 text-sm border border-neutral-900 focus:outline-none"
               />
               {formData.userType === 'STUDENT' && (
-                <p className="mt-1.5 text-xs text-neutral-500">
-                  Must be your @umich.edu email address
+                <p className="mt-1 text-xs text-neutral-500">
+                  Must be @umich.edu
                 </p>
               )}
             </div>
             
             <div>
-              <label className="label">Password</label>
+              <label className="label">PASSWORD</label>
               <input
                 type="password"
                 value={formData.password}
@@ -201,34 +237,34 @@ export default function RegisterPage() {
                 placeholder="••••••••"
                 required
                 minLength={8}
-                className="input"
+                className="w-full px-4 py-3 text-sm border border-neutral-900 focus:outline-none"
               />
             </div>
             
             <div>
-              <label className="label">Confirm Password</label>
+              <label className="label">CONFIRM PASSWORD</label>
               <input
                 type="password"
                 value={formData.confirmPassword}
                 onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
                 placeholder="••••••••"
                 required
-                className="input"
+                className="w-full px-4 py-3 text-sm border border-neutral-900 focus:outline-none"
               />
             </div>
             
             <button
               type="submit"
               disabled={loading}
-              className="btn btn-primary w-full py-3"
+              className="w-full py-4 bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-800 transition-colors disabled:opacity-50"
             >
-              {loading ? 'Creating account...' : 'Create Account'}
+              {loading ? 'CREATING ACCOUNT...' : 'CREATE ACCOUNT'}
             </button>
           </form>
           
-          <p className="mt-6 text-center text-sm text-neutral-500">
+          <p className="mt-8 text-center text-sm text-neutral-500">
             Already have an account?{' '}
-            <Link href="/login" className="font-semibold text-[#00274C] hover:underline">
+            <Link href="/login" className="text-neutral-900 hover:underline">
               Sign in
             </Link>
           </p>

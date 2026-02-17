@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams()
@@ -48,50 +49,74 @@ function VerifyEmailContent() {
   }
   
   return (
-    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center px-4 py-12 bg-neutral-50">
-      <div className="w-full max-w-md">
-        <div className="card p-8 text-center">
+    <div className="min-h-screen bg-white">
+      <div className="border-b border-neutral-200">
+        <div className="max-w-md mx-auto px-4 py-4">
+          <Link href="/" className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors">
+            ← Back to Home
+          </Link>
+        </div>
+      </div>
+
+      <div className="max-w-md mx-auto px-4 py-16">
+        <div className="text-center mb-12">
+          <Image
+            src="/logo.png"
+            alt="MaizeLease"
+            width={160}
+            height={53}
+            className="h-12 w-auto mx-auto grayscale"
+          />
+        </div>
+
+        <div className="border border-neutral-200 p-8 text-center">
           {status === 'loading' && (
             <>
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-neutral-100 mb-4">
-                <svg className="w-8 h-8 text-neutral-400 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <div className="w-16 h-16 border border-neutral-300 flex items-center justify-center mx-auto mb-6">
+                <svg className="w-6 h-6 text-neutral-400 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
               </div>
-              <h1 className="text-2xl font-bold text-neutral-900">Verifying your email...</h1>
-              <p className="mt-2 text-neutral-500">Please wait while we verify your email address.</p>
+              <h1 className="text-2xl font-serif text-neutral-900 mb-2">Verifying your email...</h1>
+              <p className="text-neutral-500 text-sm">Please wait while we verify your email address.</p>
             </>
           )}
           
           {status === 'success' && (
             <>
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <div className="w-16 h-16 border border-neutral-900 flex items-center justify-center mx-auto mb-6">
+                <svg className="w-6 h-6 text-neutral-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h1 className="text-2xl font-bold text-neutral-900">Email Verified!</h1>
-              <p className="mt-2 text-neutral-500">
+              <h1 className="text-2xl font-serif text-neutral-900 mb-2">Email Verified</h1>
+              <p className="text-neutral-500 text-sm mb-6">
                 Your email has been verified successfully. Redirecting to login...
               </p>
-              <Link href="/login" className="btn btn-primary mt-6">
-                Continue to Login
+              <Link 
+                href="/login" 
+                className="inline-block px-6 py-3 bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-800 transition-colors"
+              >
+                CONTINUE TO LOGIN
               </Link>
             </>
           )}
           
           {status === 'error' && (
             <>
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mb-4">
-                <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <div className="w-16 h-16 border border-neutral-300 flex items-center justify-center mx-auto mb-6">
+                <svg className="w-6 h-6 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </div>
-              <h1 className="text-2xl font-bold text-neutral-900">Verification Failed</h1>
-              <p className="mt-2 text-neutral-500">{error}</p>
-              <Link href="/register" className="btn btn-primary mt-6">
-                Try Again
+              <h1 className="text-2xl font-serif text-neutral-900 mb-2">Verification Failed</h1>
+              <p className="text-neutral-500 text-sm mb-6">{error}</p>
+              <Link 
+                href="/register" 
+                className="inline-block px-6 py-3 bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-800 transition-colors"
+              >
+                TRY AGAIN
               </Link>
             </>
           )}
@@ -104,8 +129,8 @@ function VerifyEmailContent() {
 export default function VerifyEmailPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-neutral-50">
-        <div className="animate-spin w-8 h-8 border-2 border-neutral-300 border-t-[#FFCB05] rounded-full" />
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="w-8 h-8 border border-neutral-300 border-t-neutral-900 rounded-full animate-spin" />
       </div>
     }>
       <VerifyEmailContent />

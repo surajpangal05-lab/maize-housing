@@ -56,9 +56,9 @@ export interface ListingFormData {
 
 export interface ListingWithUser {
   id: string
-  userId: string
-  type: ListingType
-  status: ListingStatus
+  userId: string | null
+  type: ListingType | string
+  status: ListingStatus | string
   title: string
   description: string
   address: string
@@ -66,7 +66,7 @@ export interface ListingWithUser {
   state: string
   zipCode: string
   neighborhood: string | null
-  propertyType: PropertyType
+  propertyType: PropertyType | string
   bedrooms: number
   bathrooms: number
   sqft: number | null
@@ -76,28 +76,32 @@ export interface ListingWithUser {
   utilitiesIncluded: boolean
   utilitiesNotes: string | null
   termTags: string
-  moveInDate: Date
-  moveInWindowStart: Date | null
-  moveInWindowEnd: Date | null
-  leaseEndDate: Date
+  moveInDate: Date | string
+  moveInWindowStart: Date | string | null
+  moveInWindowEnd: Date | string | null
+  leaseEndDate: Date | string
   amenities: string | null
   images: string | null
-  createdAt: Date
-  updatedAt: Date
-  expiresAt: Date
-  lastActivityAt: Date
-  renewedAt: Date | null
+  createdAt: Date | string
+  updatedAt: Date | string
+  expiresAt: Date | string
+  lastActivityAt: Date | string
+  renewedAt: Date | string | null
   viewCount: number
+  // Contact info for scraped listings
+  contactPhone?: string | null
+  contactEmail?: string | null
+  contactName?: string | null
   user: {
     id: string
     name: string | null
     email: string
     userType: string
     isUmichEmail: boolean
-    emailVerified: Date | null
-    phoneVerified: Date | null
+    emailVerified: Date | string | null
+    phoneVerified: Date | string | null
     successfulTransitions: number
-    lastActiveAt: Date
+    lastActiveAt: Date | string
   }
 }
 

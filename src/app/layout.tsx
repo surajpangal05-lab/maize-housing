@@ -26,25 +26,23 @@ export default function RootLayout({
               {children}
             </main>
             <footer className="border-t border-neutral-200 bg-white">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-                  <Link href="/" className="flex items-center">
-                    <Image 
-                      src="/logo.png" 
-                      alt="MaizeLease" 
-                      width={162} 
-                      height={60}
-                      className="h-12 w-auto"
+              <div className="max-w-5xl mx-auto px-8 py-4">
+                <div className="flex items-center justify-between">
+                  <Link href="/">
+                    <Image
+                      src="/logo.png"
+                      alt="MaizeLease"
+                      width={80}
+                      height={27}
+                      className="h-5 w-auto grayscale opacity-60 hover:opacity-100 transition-opacity"
                     />
                   </Link>
-                  <p className="text-sm text-neutral-500">
-                    © {new Date().getFullYear()} MaizeLease. Built for the UMich community.
-                  </p>
-                  <div className="flex gap-6">
-                    <a href="#" className="text-sm text-neutral-500 hover:text-neutral-700 transition-colors">Terms</a>
-                    <a href="#" className="text-sm text-neutral-500 hover:text-neutral-700 transition-colors">Privacy</a>
-                    <Link href="/contact" className="text-sm text-neutral-500 hover:text-neutral-700 transition-colors">Contact</Link>
+                  <div className="flex items-center gap-6">
+                    <Link href="/listings" className="text-xs text-neutral-500 hover:text-neutral-900 tracking-wider">Browse</Link>
+                    <Link href="/contact" className="text-xs text-neutral-500 hover:text-neutral-900 tracking-wider">Contact</Link>
+                    <a href="#" className="text-xs text-neutral-500 hover:text-neutral-900 tracking-wider">Terms</a>
                   </div>
+                  <p className="text-xs text-neutral-400">© 2026</p>
                 </div>
               </div>
             </footer>

@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import Image from 'next/image'
 import { UserType } from '@/lib/types'
 import { getVerificationBadge, formatDate } from '@/lib/utils'
-import VerificationBadge from '@/components/VerificationBadge'
 
 export default function ProfilePage() {
   const { data: session, status } = useSession()
@@ -25,7 +26,6 @@ export default function ProfilePage() {
   } | null>(null)
   const [loading, setLoading] = useState(true)
   
-  // Phone verification state
   const [phoneNumber, setPhoneNumber] = useState('')
   const [verificationCode, setVerificationCode] = useState('')
   const [showCodeInput, setShowCodeInput] = useState(false)
@@ -33,7 +33,6 @@ export default function ProfilePage() {
   const [phoneError, setPhoneError] = useState('')
   const [demoCode, setDemoCode] = useState('')
   
-  // Profile editing
   const [editName, setEditName] = useState('')
   const [nameLoading, setNameLoading] = useState(false)
   
@@ -84,7 +83,7 @@ export default function ProfilePage() {
       
       if (data.success) {
         setShowCodeInput(true)
-        setDemoCode(data.code) // Demo only - would be sent via SMS in production
+        setDemoCode(data.code)
       } else {
         setPhoneError(data.error || 'Failed to send verification code')
       }
@@ -155,10 +154,17 @@ export default function ProfilePage() {
   
   if (status === 'loading' || loading) {
     return (
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="animate-pulse space-y-6">
-          <div className="h-8 bg-neutral-200 rounded w-1/4" />
-          <div className="h-64 bg-neutral-200 rounded-xl" />
+      <div className="min-h-screen bg-white">
+        <div className="border-b border-neutral-200">
+          <div className="max-w-3xl mx-auto px-4 py-4">
+            <div className="h-4 bg-neutral-100 w-24" />
+          </div>
+        </div>
+        <div className="max-w-3xl mx-auto px-4 py-12">
+          <div className="animate-pulse space-y-6">
+            <div className="h-8 bg-neutral-100 w-1/4" />
+            <div className="h-64 bg-neutral-100" />
+          </div>
         </div>
       </div>
     )
@@ -174,222 +180,229 @@ export default function ProfilePage() {
   )
   
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-neutral-900">Profile</h1>
-        <p className="mt-2 text-neutral-500">
-          Manage your account and verification status
-        </p>
+    <div className="min-h-screen bg-white">
+      <div className="border-b border-neutral-200">
+        <div className="max-w-3xl mx-auto px-4 py-4">
+          <Link href="/dashboard" className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors">
+            ← Back to Dashboard
+          </Link>
+        </div>
       </div>
-      
-      {/* Profile Card */}
-      <div className="card p-6 mb-6">
-        <div className="flex items-start gap-4">
-          <div className="w-16 h-16 rounded-full bg-[#FFCB05] flex items-center justify-center flex-shrink-0">
-            <span className="text-[#00274C] text-2xl font-bold">
-              {user.name?.[0]?.toUpperCase() || user.email[0].toUpperCase()}
-            </span>
-          </div>
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <h2 className="text-xl font-semibold text-neutral-900">
-                {user.name || user.email.split('@')[0]}
-              </h2>
-              <VerificationBadge
-                userType={user.userType as UserType}
-                emailVerified={user.emailVerified}
-                phoneVerified={user.phoneVerified}
-                isUmichEmail={user.isUmichEmail}
-                size="sm"
-              />
+
+      <div className="max-w-3xl mx-auto px-4 py-12">
+        <h1 className="text-3xl font-serif text-neutral-900 mb-2">Profile</h1>
+        <p className="text-neutral-500 mb-12">Manage your account and verification status</p>
+        
+        {/* Profile Card */}
+        <div className="border border-neutral-200 p-8 mb-8">
+          <div className="flex items-start gap-6">
+            <div className="w-16 h-16 border border-neutral-300 flex items-center justify-center flex-shrink-0">
+              <span className="text-neutral-900 text-2xl font-serif">
+                {user.name?.[0]?.toUpperCase() || user.email[0].toUpperCase()}
+              </span>
             </div>
-            <p className="text-neutral-500">{user.email}</p>
-            <p className="text-sm text-neutral-400 mt-1">
-              Member since {formatDate(user.createdAt)}
-            </p>
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-1">
+                <h2 className="text-xl font-serif text-neutral-900">
+                  {user.name || user.email.split('@')[0]}
+                </h2>
+                <span className="text-xs font-mono px-2 py-1 border border-neutral-300">
+                  {badge?.label || 'UNVERIFIED'}
+                </span>
+              </div>
+              <p className="text-neutral-500 text-sm">{user.email}</p>
+              <p className="text-xs text-neutral-400 mt-2">
+                Member since {formatDate(user.createdAt)}
+              </p>
+            </div>
+          </div>
+          
+          {/* Stats */}
+          <div className="mt-8 pt-8 border-t border-neutral-200 grid grid-cols-2 gap-8">
+            <div>
+              <p className="text-xs font-mono text-neutral-500 tracking-wider mb-1">ACCOUNT TYPE</p>
+              <p className="font-medium text-neutral-900 capitalize">{user.userType.toLowerCase()}</p>
+            </div>
+            <div>
+              <p className="text-xs font-mono text-neutral-500 tracking-wider mb-1">SUCCESSFUL TRANSITIONS</p>
+              <p className="font-medium text-neutral-900">{user.successfulTransitions}</p>
+            </div>
           </div>
         </div>
         
-        {/* Stats */}
-        <div className="mt-6 pt-6 border-t border-neutral-100 grid grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm text-neutral-500">Account Type</p>
-            <p className="font-semibold text-neutral-900 capitalize">{user.userType.toLowerCase()}</p>
-          </div>
-          <div>
-            <p className="text-sm text-neutral-500">Successful Transitions</p>
-            <p className="font-semibold text-neutral-900">{user.successfulTransitions}</p>
+        {/* Edit Name */}
+        <div className="border border-neutral-200 p-8 mb-8">
+          <h3 className="font-serif text-lg text-neutral-900 mb-6">Display Name</h3>
+          <div className="flex gap-4">
+            <input
+              type="text"
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              placeholder="Your name"
+              className="flex-1 px-4 py-3 text-sm border border-neutral-300 focus:outline-none focus:border-neutral-900"
+            />
+            <button
+              onClick={updateName}
+              disabled={nameLoading || !editName.trim() || editName === user.name}
+              className="px-6 py-3 bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-800 transition-colors disabled:opacity-50"
+            >
+              {nameLoading ? 'SAVING...' : 'SAVE'}
+            </button>
           </div>
         </div>
-      </div>
-      
-      {/* Edit Name */}
-      <div className="card p-6 mb-6">
-        <h3 className="font-semibold text-neutral-900 mb-4">Display Name</h3>
-        <div className="flex gap-3">
-          <input
-            type="text"
-            value={editName}
-            onChange={(e) => setEditName(e.target.value)}
-            placeholder="Your name"
-            className="input flex-1"
-          />
-          <button
-            onClick={updateName}
-            disabled={nameLoading || !editName.trim() || editName === user.name}
-            className="btn btn-primary px-6"
-          >
-            {nameLoading ? 'Saving...' : 'Save'}
-          </button>
-        </div>
-      </div>
-      
-      {/* Verification Status */}
-      <div className="card p-6 mb-6">
-        <h3 className="font-semibold text-neutral-900 mb-4">Verification Status</h3>
         
-        {/* Email Verification */}
-        <div className="flex items-center justify-between py-4 border-b border-neutral-100">
-          <div>
-            <p className="font-medium text-neutral-900">Email Verification</p>
-            <p className="text-sm text-neutral-500">{user.email}</p>
+        {/* Verification Status */}
+        <div className="border border-neutral-200 p-8 mb-8">
+          <h3 className="font-serif text-lg text-neutral-900 mb-6">Verification Status</h3>
+          
+          {/* Email Verification */}
+          <div className="flex items-center justify-between py-4 border-b border-neutral-200">
+            <div>
+              <p className="font-medium text-neutral-900">Email</p>
+              <p className="text-sm text-neutral-500">{user.email}</p>
+            </div>
+            {user.emailVerified ? (
+              <span className="text-xs font-mono px-3 py-1 border border-neutral-900 text-neutral-900">
+                VERIFIED
+              </span>
+            ) : (
+              <span className="text-xs font-mono px-3 py-1 border border-neutral-300 text-neutral-500">
+                PENDING
+              </span>
+            )}
           </div>
-          {user.emailVerified ? (
-            <span className="badge badge-green">
-              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              Verified
-            </span>
-          ) : (
-            <span className="badge badge-gray">Pending</span>
+          
+          {/* Phone Verification (for landlords) */}
+          {user.userType === 'LANDLORD' && (
+            <div className="py-4">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="font-medium text-neutral-900">Phone</p>
+                  <p className="text-sm text-neutral-500">
+                    {user.phoneVerified ? user.phone : 'Required for Verified Landlord badge'}
+                  </p>
+                </div>
+                {user.phoneVerified ? (
+                  <span className="text-xs font-mono px-3 py-1 border border-neutral-900 text-neutral-900">
+                    VERIFIED
+                  </span>
+                ) : (
+                  <span className="text-xs font-mono px-3 py-1 border border-neutral-300 text-neutral-500">
+                    NOT VERIFIED
+                  </span>
+                )}
+              </div>
+              
+              {!user.phoneVerified && (
+                <div className="space-y-4">
+                  {phoneError && (
+                    <div className="p-4 border border-red-500 text-red-600 text-sm">
+                      {phoneError}
+                    </div>
+                  )}
+                  
+                  {!showCodeInput ? (
+                    <div className="flex gap-4">
+                      <input
+                        type="tel"
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        placeholder="(123) 456-7890"
+                        className="flex-1 px-4 py-3 text-sm border border-neutral-300 focus:outline-none focus:border-neutral-900"
+                      />
+                      <button
+                        onClick={sendPhoneVerification}
+                        disabled={phoneLoading}
+                        className="px-6 py-3 bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-800 transition-colors disabled:opacity-50"
+                      >
+                        {phoneLoading ? 'SENDING...' : 'SEND CODE'}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {demoCode && (
+                        <div className="p-4 border border-dashed border-neutral-300">
+                          <p className="text-xs font-mono text-neutral-500 mb-2">DEMO MODE</p>
+                          <p className="text-sm text-neutral-600">
+                            Verification code: <code className="bg-neutral-100 px-2 py-1">{demoCode}</code>
+                          </p>
+                        </div>
+                      )}
+                      
+                      <div className="flex gap-4">
+                        <input
+                          type="text"
+                          value={verificationCode}
+                          onChange={(e) => setVerificationCode(e.target.value)}
+                          placeholder="Enter 6-digit code"
+                          maxLength={6}
+                          className="flex-1 px-4 py-3 text-sm border border-neutral-300 focus:outline-none focus:border-neutral-900"
+                        />
+                        <button
+                          onClick={verifyPhoneCode}
+                          disabled={phoneLoading}
+                          className="px-6 py-3 bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-800 transition-colors disabled:opacity-50"
+                        >
+                          {phoneLoading ? 'VERIFYING...' : 'VERIFY'}
+                        </button>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setShowCodeInput(false)
+                          setVerificationCode('')
+                          setDemoCode('')
+                        }}
+                        className="text-sm text-neutral-500 hover:text-neutral-900"
+                      >
+                        ← Back
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           )}
         </div>
         
-        {/* Phone Verification (for landlords) */}
-        {user.userType === 'LANDLORD' && (
-          <div className="py-4">
-            <div className="flex items-center justify-between mb-4">
+        {/* Benefits */}
+        <div className="border border-dashed border-neutral-300 p-8">
+          <h3 className="font-serif text-lg text-neutral-900 mb-6">Verification Benefits</h3>
+          <ul className="space-y-4">
+            <li className="flex items-start gap-4">
+              <div className="w-6 h-6 border border-neutral-300 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg className="w-3 h-3 text-neutral-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              </div>
               <div>
-                <p className="font-medium text-neutral-900">Phone Verification</p>
-                <p className="text-sm text-neutral-500">
-                  {user.phoneVerified ? user.phone : 'Required for "Verified Landlord" badge'}
-                </p>
+                <p className="font-medium text-neutral-900">Build Trust</p>
+                <p className="text-sm text-neutral-500">Verified users get a badge that shows others you're legitimate.</p>
               </div>
-              {user.phoneVerified ? (
-                <span className="badge badge-green">
-                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  Verified
-                </span>
-              ) : (
-                <span className="badge badge-gray">Not verified</span>
-              )}
-            </div>
-            
-            {!user.phoneVerified && (
-              <div className="space-y-3">
-                {phoneError && (
-                  <div className="alert alert-error">
-                    {phoneError}
-                  </div>
-                )}
-                
-                {!showCodeInput ? (
-                  <div className="flex gap-3">
-                    <input
-                      type="tel"
-                      value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value)}
-                      placeholder="(123) 456-7890"
-                      className="input flex-1"
-                    />
-                    <button
-                      onClick={sendPhoneVerification}
-                      disabled={phoneLoading}
-                      className="btn btn-primary px-6"
-                    >
-                      {phoneLoading ? 'Sending...' : 'Send Code'}
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {/* Demo mode - show code */}
-                    {demoCode && (
-                      <div className="alert alert-warning">
-                        🔧 <strong>Demo Mode:</strong> Your verification code is <code className="bg-amber-100 px-2 py-0.5 rounded mx-1">{demoCode}</code>
-                      </div>
-                    )}
-                    
-                    <div className="flex gap-3">
-                      <input
-                        type="text"
-                        value={verificationCode}
-                        onChange={(e) => setVerificationCode(e.target.value)}
-                        placeholder="Enter 6-digit code"
-                        maxLength={6}
-                        className="input flex-1"
-                      />
-                      <button
-                        onClick={verifyPhoneCode}
-                        disabled={phoneLoading}
-                        className="btn btn-primary px-6"
-                      >
-                        {phoneLoading ? 'Verifying...' : 'Verify'}
-                      </button>
-                    </div>
-                    <button
-                      onClick={() => {
-                        setShowCodeInput(false)
-                        setVerificationCode('')
-                        setDemoCode('')
-                      }}
-                      className="text-sm text-neutral-500 hover:text-neutral-700 font-medium"
-                    >
-                      ← Back
-                    </button>
-                  </div>
-                )}
+            </li>
+            <li className="flex items-start gap-4">
+              <div className="w-6 h-6 border border-neutral-300 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg className="w-3 h-3 text-neutral-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
               </div>
-            )}
-          </div>
-        )}
-      </div>
-      
-      {/* Verification Benefits */}
-      <div className="card p-6 bg-neutral-50">
-        <h3 className="font-semibold text-neutral-900 mb-4">Verification Benefits</h3>
-        <ul className="space-y-4">
-          <li className="flex items-start gap-3">
-            <svg className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            <div>
-              <p className="font-medium text-neutral-900">Build Trust</p>
-              <p className="text-sm text-neutral-500">Verified users get a badge that shows others you&apos;re legitimate.</p>
-            </div>
-          </li>
-          <li className="flex items-start gap-3">
-            <svg className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            <div>
-              <p className="font-medium text-neutral-900">Higher Visibility</p>
-              <p className="text-sm text-neutral-500">Verified listings rank higher in search results.</p>
-            </div>
-          </li>
-          <li className="flex items-start gap-3">
-            <svg className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            <div>
-              <p className="font-medium text-neutral-900">Full Access</p>
-              <p className="text-sm text-neutral-500">Post listings and contact other users on the platform.</p>
-            </div>
-          </li>
-        </ul>
+              <div>
+                <p className="font-medium text-neutral-900">Higher Visibility</p>
+                <p className="text-sm text-neutral-500">Verified listings rank higher in search results.</p>
+              </div>
+            </li>
+            <li className="flex items-start gap-4">
+              <div className="w-6 h-6 border border-neutral-300 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg className="w-3 h-3 text-neutral-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div>
+                <p className="font-medium text-neutral-900">Full Access</p>
+                <p className="text-sm text-neutral-500">Post listings and contact other users on the platform.</p>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   )
