@@ -240,8 +240,8 @@ export class SyncEngine {
   private async upsertListing(
     sourceId: string,
     listing: NormalizedListing
-  ): Promise<{ listingId: string; created: boolean; updated: boolean }> {
-    // Try to find existing by sourceListingId or canonicalUrl
+  ): Promise<{ listingId: string; created: boolean; updated: boolean; skipped?: boolean }> {
+    // Try to find existing by sourceListingId or canonicalUrl (same source)
     let existing = null;
 
     if (listing.sourceListingId) {
@@ -254,6 +254,43 @@ export class SyncEngine {
       existing = await this.prisma.listing.findFirst({
         where: { sourceId, canonicalUrl: listing.canonicalUrl },
       });
+    }
+
+    // Cross-source deduplication: check if same address exists from ANY source
+    if (!existing && listing.street && listing.city) {
+      const normalizedStreet = this.normalizeAddress(listing.street);
+      const normalizedUnit = listing.unit ? this.normalizeAddress(listing.unit) : null;
+      
+      const crossSourceDuplicate = await this.prisma.listing.findFirst({
+        where: {
+          city: { equals: listing.city, mode: 'insensitive' },
+          street: { not: null },
+        },
+      });
+
+      // Check all listings in this city for address match
+      if (crossSourceDuplicate) {
+        const cityListings = await this.prisma.listing.findMany({
+          where: { city: { equals: listing.city, mode: 'insensitive' } },
+          select: { id: true, street: true, unit: true, sourceId: true },
+        });
+
+        for (const cl of cityListings) {
+          if (cl.sourceId === sourceId) continue; // Skip same source
+          if (!cl.street) continue;
+          
+          const existingStreet = this.normalizeAddress(cl.street);
+          const existingUnit = cl.unit ? this.normalizeAddress(cl.unit) : null;
+          
+          if (existingStreet === normalizedStreet && existingUnit === normalizedUnit) {
+            this.logger.debug(
+              { street: listing.street, city: listing.city },
+              'Skipping duplicate from another source'
+            );
+            return { listingId: cl.id, created: false, updated: false, skipped: true };
+          }
+        }
+      }
     }
 
     const data = {
@@ -299,7 +336,18 @@ export class SyncEngine {
 
   private async ensureSource() {
     const name = this.options.source;
-    const baseUrl = 'https://www.michiganrental.com';
+    
+    // Map source names to their base URLs
+    const sourceUrls: Record<string, string> = {
+      michiganrental: 'https://www.michiganrental.com',
+      umich: 'https://offcampushousing.umich.edu',
+      mckinley: 'https://www.mckinley.com',
+      jkeller: 'https://www.jkellerproperties.com',
+      oxford: 'https://oxfordcompanies.com',
+      cmb: 'https://annarborapartments.net',
+    };
+    
+    const baseUrl = sourceUrls[name] || `https://${name}.com`;
 
     let source = await this.prisma.source.findUnique({ where: { name } });
     if (!source) {
@@ -309,6 +357,20 @@ export class SyncEngine {
       this.logger.info({ sourceId: source.id, name }, 'Created source record');
     }
     return source;
+  }
+
+  /**
+   * Normalize an address string for comparison
+   */
+  private normalizeAddress(addr: string): string {
+    return addr
+      .toLowerCase()
+      .replace(/\./g, '')
+      .replace(/,/g, '')
+      .replace(/\s+/g, ' ')
+      .replace(/\b(street|st|avenue|ave|road|rd|drive|dr|lane|ln|court|ct|boulevard|blvd)\b/gi, '')
+      .replace(/\b(apartment|apt|unit|#)\b/gi, '')
+      .trim();
   }
 
   /**

@@ -76,6 +76,7 @@ model ListingImage {
 
   listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
+  @@unique([listingId, originalUrl])
   @@index([listingId])
   @@index([checksumSha256])
 }

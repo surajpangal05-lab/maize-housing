@@ -2,12 +2,22 @@ import 'dotenv/config';
 import { Command } from 'commander';
 import { EndpointDiscoverer } from '../discovery/interceptor';
 import { SyncEngine } from '../sync/sync-engine';
-import { createLogger, disconnectPrisma } from '@michigan-rental/shared';
+import { McKinleyScraper } from '../sources/mckinley';
+import { JKellerScraper } from '../sources/jkeller';
+import { UMichScraper } from '../sources/umich';
+import { createLogger, disconnectPrisma, getPrisma } from '@michigan-rental/shared';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 
 const logger = createLogger('cli');
 const program = new Command();
+
+// Available HTML scrapers for new sources
+const htmlScrapers: Record<string, () => import('../sources/index').SourceScraper> = {
+  mckinley: () => new McKinleyScraper({ logger }),
+  jkeller: () => new JKellerScraper({ logger }),
+  umich: () => new UMichScraper({ logger }),
+};
 
 program
   .name('michigan-rental-scraper')
@@ -117,6 +127,258 @@ program
       }, 'Contact scrape complete');
     } catch (err) {
       logger.error({ error: (err as Error).message }, 'Contact scrape failed');
+      process.exit(1);
+    } finally {
+      await disconnectPrisma();
+    }
+  });
+
+// ─── sync-html ────────────────────────────────────────────────────────
+program
+  .command('sync-html')
+  .description('Sync listings from HTML scrapers (mckinley, jkeller, umich)')
+  .option('--source <name>', 'Source name (mckinley, jkeller, umich)', '')
+  .option('--limit <n>', 'Max listings per source (0 = all)', '0')
+  .action(async (opts) => {
+    const prisma = getPrisma();
+    const limit = parseInt(opts.limit, 10);
+    const sources = opts.source ? [opts.source] : Object.keys(htmlScrapers);
+    
+    let totalUpserted = 0;
+    let totalSkipped = 0;
+
+    try {
+      for (const sourceName of sources) {
+        if (!htmlScrapers[sourceName]) {
+          logger.warn({ source: sourceName }, 'Unknown HTML source, skipping');
+          continue;
+        }
+
+        logger.info({ source: sourceName }, 'Starting HTML scrape');
+        
+        const scraper = htmlScrapers[sourceName]();
+        const listings = await scraper.scrapeListings();
+        
+        logger.info({ source: sourceName, count: listings.length }, 'Scraped listings');
+
+        // Ensure source exists
+        let source = await prisma.source.findUnique({ where: { name: sourceName } });
+        if (!source) {
+          source = await prisma.source.create({
+            data: { name: sourceName, baseUrl: scraper.baseUrl },
+          });
+        }
+
+        // Upsert listings
+        for (const listing of listings) {
+          if (limit > 0 && totalUpserted >= limit) break;
+
+          try {
+            // Check for cross-source duplicates by address
+            if (listing.street && listing.city) {
+              const normalizedStreet = listing.street.toLowerCase().replace(/[^a-z0-9]/g, '');
+              const existingDupe = await prisma.listing.findFirst({
+                where: {
+                  city: { equals: listing.city, mode: 'insensitive' },
+                  NOT: { sourceId: source.id },
+                },
+              });
+
+              if (existingDupe) {
+                const cityListings = await prisma.listing.findMany({
+                  where: { city: { equals: listing.city, mode: 'insensitive' } },
+                  select: { street: true, sourceId: true },
+                });
+
+                const isDupe = cityListings.some(cl => {
+                  if (cl.sourceId === source!.id || !cl.street) return false;
+                  const clNormalized = cl.street.toLowerCase().replace(/[^a-z0-9]/g, '');
+                  return clNormalized === normalizedStreet;
+                });
+
+                if (isDupe) {
+                  totalSkipped++;
+                  continue;
+                }
+              }
+            }
+
+            await prisma.listing.upsert({
+              where: {
+                sourceId_canonicalUrl: {
+                  sourceId: source.id,
+                  canonicalUrl: listing.canonicalUrl,
+                },
+              },
+              create: {
+                sourceId: source.id,
+                sourceListingId: listing.sourceListingId,
+                canonicalUrl: listing.canonicalUrl,
+                title: listing.title,
+                street: listing.street,
+                unit: listing.unit,
+                city: listing.city,
+                state: listing.state,
+                zip: listing.zip,
+                priceMin: listing.priceMin,
+                priceMax: listing.priceMax,
+                beds: listing.beds,
+                baths: listing.baths,
+                sqft: listing.sqft,
+                propertyType: listing.propertyType,
+                availabilityDate: listing.availabilityDate,
+                description: listing.description,
+                contactJson: listing.contactJson ?? undefined,
+                scrapedAt: new Date(),
+              },
+              update: {
+                title: listing.title,
+                priceMin: listing.priceMin,
+                priceMax: listing.priceMax,
+                beds: listing.beds,
+                baths: listing.baths,
+                sqft: listing.sqft,
+                availabilityDate: listing.availabilityDate,
+                description: listing.description,
+                contactJson: listing.contactJson ?? undefined,
+                scrapedAt: new Date(),
+              },
+            });
+
+            // Store images
+            if (listing.imageUrls && listing.imageUrls.length > 0) {
+              const dbListing = await prisma.listing.findFirst({
+                where: { sourceId: source.id, canonicalUrl: listing.canonicalUrl },
+              });
+              if (dbListing) {
+                for (let i = 0; i < listing.imageUrls.length; i++) {
+                  await prisma.listingImage.upsert({
+                    where: {
+                      listingId_originalUrl: {
+                        listingId: dbListing.id,
+                        originalUrl: listing.imageUrls[i],
+                      },
+                    },
+                    create: {
+                      listingId: dbListing.id,
+                      originalUrl: listing.imageUrls[i],
+                      sortOrder: i,
+                    },
+                    update: { sortOrder: i },
+                  }).catch(() => {}); // Ignore duplicate errors
+                }
+              }
+            }
+
+            totalUpserted++;
+          } catch (err) {
+            logger.warn({ error: (err as Error).message, listing: listing.title }, 'Failed to upsert listing');
+          }
+        }
+      }
+
+      logger.info({ upserted: totalUpserted, skipped: totalSkipped }, 'HTML sync complete');
+    } catch (err) {
+      logger.error({ error: (err as Error).message }, 'HTML sync failed');
+      process.exit(1);
+    } finally {
+      await disconnectPrisma();
+    }
+  });
+
+// ─── sync-all ────────────────────────────────────────────────────────
+program
+  .command('sync-all')
+  .description('Sync listings from ALL sources (michiganrental + HTML scrapers)')
+  .option('--limit <n>', 'Max listings per source (0 = all)', '0')
+  .action(async (opts) => {
+    const limit = parseInt(opts.limit, 10);
+    
+    try {
+      // 1. Sync michiganrental (API-based)
+      logger.info('Syncing michiganrental...');
+      const engine = new SyncEngine({
+        source: 'michiganrental',
+        limit,
+        configPath: path.resolve(process.cwd(), 'config/discovery.json'),
+        rateLimitRps: parseFloat(process.env.RATE_LIMIT_RPS || '1'),
+      });
+      const mrResult = await engine.run();
+      logger.info({ 
+        source: 'michiganrental', 
+        upserted: mrResult.listingsUpserted,
+        skipped: mrResult.listingsSkipped,
+      }, 'michiganrental sync complete');
+
+      // 2. Sync HTML sources
+      logger.info('Syncing HTML sources...');
+      // Run sync-html programmatically
+      const prisma = getPrisma();
+      
+      for (const sourceName of Object.keys(htmlScrapers)) {
+        logger.info({ source: sourceName }, 'Starting HTML scrape');
+        
+        const scraper = htmlScrapers[sourceName]();
+        const listings = await scraper.scrapeListings();
+        
+        // Ensure source
+        let source = await prisma.source.findUnique({ where: { name: sourceName } });
+        if (!source) {
+          source = await prisma.source.create({
+            data: { name: sourceName, baseUrl: scraper.baseUrl },
+          });
+        }
+
+        let upserted = 0;
+        for (const listing of listings) {
+          if (limit > 0 && upserted >= limit) break;
+          
+          try {
+            await prisma.listing.upsert({
+              where: {
+                sourceId_canonicalUrl: {
+                  sourceId: source.id,
+                  canonicalUrl: listing.canonicalUrl,
+                },
+              },
+              create: {
+                sourceId: source.id,
+                sourceListingId: listing.sourceListingId,
+                canonicalUrl: listing.canonicalUrl,
+                title: listing.title,
+                street: listing.street,
+                city: listing.city,
+                state: listing.state,
+                zip: listing.zip,
+                priceMin: listing.priceMin,
+                priceMax: listing.priceMax,
+                beds: listing.beds,
+                baths: listing.baths,
+                sqft: listing.sqft,
+                propertyType: listing.propertyType,
+                description: listing.description,
+                contactJson: listing.contactJson ?? undefined,
+                scrapedAt: new Date(),
+              },
+              update: {
+                title: listing.title,
+                priceMin: listing.priceMin,
+                priceMax: listing.priceMax,
+                scrapedAt: new Date(),
+              },
+            });
+            upserted++;
+          } catch (err) {
+            // Skip errors
+          }
+        }
+        
+        logger.info({ source: sourceName, upserted }, 'HTML source sync complete');
+      }
+
+      logger.info('All sources synced!');
+    } catch (err) {
+      logger.error({ error: (err as Error).message }, 'Sync-all failed');
       process.exit(1);
     } finally {
       await disconnectPrisma();
