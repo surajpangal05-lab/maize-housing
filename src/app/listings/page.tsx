@@ -3,9 +3,12 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
+import { useSession } from 'next-auth/react'
 import ListingCard from '@/components/ListingCard'
 import SearchFilters, { EmptyListingsState } from '@/components/SearchFilters'
 import { ListingWithUser, SearchFilters as SearchFiltersType } from '@/lib/types'
+
+const FREE_PREVIEW_COUNT = 3
 
 const ListingsMap = dynamic(() => import('@/components/ListingsMap'), {
   ssr: false,
@@ -23,12 +26,16 @@ const ListingsMap = dynamic(() => import('@/components/ListingsMap'), {
 })
 
 export default function ListingsPage() {
+  const { data: session, status: authStatus } = useSession()
   const [listings, setListings] = useState<ListingWithUser[]>([])
   const [loading, setLoading] = useState(true)
   const [filters, setFilters] = useState<SearchFiltersType>({})
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 })
   const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid')
   const [sortBy, setSortBy] = useState<string>('newest')
+
+  const isSignedIn = !!session
+  const isAuthLoading = authStatus === 'loading'
 
   useEffect(() => { fetchListings() }, [filters, sortBy])
 
@@ -141,12 +148,40 @@ export default function ListingsPage() {
         ) : listings.length > 0 ? (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {listings.map(listing => (
+              {(isSignedIn || isAuthLoading ? listings : listings.slice(0, FREE_PREVIEW_COUNT)).map(listing => (
                 <ListingCard key={listing.id} listing={listing} />
               ))}
             </div>
 
-            {pagination.totalPages > 1 && (
+            {/* Sign-in wall for unauthenticated users */}
+            {!isSignedIn && !isAuthLoading && listings.length > FREE_PREVIEW_COUNT && (
+              <div className="relative mt-2">
+                <div className="absolute inset-x-0 -top-32 h-32 bg-gradient-to-t from-gray-50 to-transparent pointer-events-none z-10" />
+                <div className="relative z-20 py-16 text-center">
+                  <div className="max-w-md mx-auto">
+                    <div className="w-16 h-16 bg-[#FFCB05] rounded-2xl flex items-center justify-center mx-auto mb-5">
+                      <svg className="w-8 h-8 text-[#00274C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                    </div>
+                    <h2 className="text-2xl font-bold text-[#00274C] mb-2">Sign in to see all listings</h2>
+                    <p className="text-gray-500 mb-6">
+                      Create a free account to browse {pagination.total - FREE_PREVIEW_COUNT}+ more listings, save favorites, and contact landlords directly.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <Link href="/login?callbackUrl=/listings" className="btn btn-lg bg-[#FFCB05] text-[#00274C] hover:bg-[#FFD42E] px-8">
+                        Sign In
+                      </Link>
+                      <Link href="/register?callbackUrl=/listings" className="btn btn-lg btn-outline px-8">
+                        Create Account
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {isSignedIn && pagination.totalPages > 1 && (
               <div className="mt-12 flex justify-center items-center gap-4">
                 <button onClick={() => fetchListings(pagination.page - 1)} disabled={pagination.page === 1} className="btn btn-outline btn-sm">Previous</button>
                 <span className="text-gray-600">Page <span className="font-semibold text-[#00274C]">{pagination.page}</span> of {pagination.totalPages}</span>
