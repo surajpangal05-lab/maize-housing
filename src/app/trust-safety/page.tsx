@@ -25,7 +25,7 @@ export default function TrustSafetyPage() {
         </svg>
       ),
       title: 'Meet in Public',
-      description: 'For first meetings, choose a public space like a coffee shop or the Diag. Never meet alone at night.',
+      description: 'For first meetings, choose a public space like a coffee shop or the Diag.',
     },
     {
       icon: (
@@ -34,7 +34,7 @@ export default function TrustSafetyPage() {
         </svg>
       ),
       title: 'Verify Identity',
-      description: 'Only communicate with verified users. Ask for student ID or landlord credentials if needed.',
+      description: 'Only communicate with verified users. Ask for student ID if needed.',
     },
     {
       icon: (
@@ -43,7 +43,7 @@ export default function TrustSafetyPage() {
         </svg>
       ),
       title: 'Document Everything',
-      description: 'Use our messaging system to keep records. Get agreements in writing before exchanging money.',
+      description: 'Get agreements in writing before exchanging money.',
     },
     {
       icon: (
@@ -52,7 +52,7 @@ export default function TrustSafetyPage() {
         </svg>
       ),
       title: 'Secure Payments',
-      description: 'Never wire money or pay in cash upfront. Use traceable methods and get receipts.',
+      description: 'Never wire money upfront. Use traceable methods.',
     },
     {
       icon: (
@@ -61,7 +61,7 @@ export default function TrustSafetyPage() {
         </svg>
       ),
       title: 'Trust Your Instincts',
-      description: 'If something feels off, it probably is. Walk away from deals that seem too good to be true.',
+      description: 'If something feels off, walk away from the deal.',
     },
     {
       icon: (
@@ -70,112 +70,91 @@ export default function TrustSafetyPage() {
         </svg>
       ),
       title: 'Visit in Person',
-      description: 'Always see the property before signing anything. Take photos and note any issues.',
+      description: 'Always see the property before signing anything.',
     },
   ]
 
   return (
     <div className="min-h-screen">
       {/* Hero */}
-      <section className="bg-gradient-to-br from-[#00274C] to-[#1E3A5F] py-20">
+      <section className="bg-[#00274C] py-16">
         <div className="container">
           <div className="max-w-3xl">
-            <span className="inline-block px-4 py-2 bg-[#FFCB05]/20 text-[#FFCB05] text-sm font-semibold rounded-full mb-6">
-              Trust & Safety
-            </span>
-            <h1 className="text-white mb-6">Your Safety is Our Priority</h1>
-            <p className="text-xl text-white/70 leading-relaxed">
-              MaizeLease is built on trust. Learn how our verification system works and how to stay safe when finding housing.
+            <h1 className="text-white mb-4">Trust & Safety</h1>
+            <p className="text-xl text-white/70">
+              Learn how our verification system works and how to stay safe when finding housing.
             </p>
           </div>
         </div>
       </section>
 
       {/* Verification Process */}
-      <section className="section bg-white">
+      <section className="section">
         <div className="container">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12">
             <h2 className="mb-4">How Verification Works</h2>
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              Every user on MaizeLease goes through our verification process. Here's what it looks like.
+            <p className="text-gray-600 max-w-xl mx-auto">
+              Every user on MaizeLease goes through our verification process.
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-12">
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Students */}
-            <div className="bg-gradient-to-br from-[#FFCB05]/10 to-white rounded-3xl p-8 border border-[#FFCB05]/20">
-              <div className="flex items-center gap-4 mb-8">
-                <div className="w-14 h-14 rounded-2xl bg-[#FFCB05] flex items-center justify-center">
-                  <svg className="w-7 h-7 text-[#00274C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 rounded-lg bg-[#FFCB05] flex items-center justify-center">
+                  <svg className="w-6 h-6 text-[#00274C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-[#00274C]">For Students</h3>
-                  <p className="text-gray-500">@umich.edu email required</p>
+                  <h3 className="font-semibold text-[#00274C]">For Students</h3>
+                  <p className="text-sm text-gray-500">@umich.edu email required</p>
                 </div>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {verificationSteps.students.map((step, index) => (
-                  <div key={index} className="flex gap-4">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#FFCB05] text-[#00274C] flex items-center justify-center font-bold">
+                  <div key={index} className="flex gap-3">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#FFCB05] text-[#00274C] flex items-center justify-center text-sm font-bold">
                       {step.step}
                     </div>
                     <div>
-                      <h4 className="font-semibold text-[#00274C]">{step.title}</h4>
-                      <p className="text-gray-600 text-sm">{step.description}</p>
+                      <p className="font-medium text-[#00274C]">{step.title}</p>
+                      <p className="text-sm text-gray-600">{step.description}</p>
                     </div>
                   </div>
                 ))}
-              </div>
-
-              <div className="mt-8 p-4 bg-white rounded-xl border border-[#FFCB05]/30">
-                <div className="flex items-center gap-2 text-[#00274C] font-semibold">
-                  <svg className="w-5 h-5 text-[#FFCB05]" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  Verified Student Badge
-                </div>
               </div>
             </div>
 
             {/* Landlords */}
-            <div className="bg-gradient-to-br from-[#228B22]/10 to-white rounded-3xl p-8 border border-[#228B22]/20">
-              <div className="flex items-center gap-4 mb-8">
-                <div className="w-14 h-14 rounded-2xl bg-[#228B22] flex items-center justify-center">
-                  <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 rounded-lg bg-[#00274C] flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-[#00274C]">For Landlords</h3>
-                  <p className="text-gray-500">Email + phone verification</p>
+                  <h3 className="font-semibold text-[#00274C]">For Landlords</h3>
+                  <p className="text-sm text-gray-500">Email + phone verification</p>
                 </div>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {verificationSteps.landlords.map((step, index) => (
-                  <div key={index} className="flex gap-4">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#228B22] text-white flex items-center justify-center font-bold">
+                  <div key={index} className="flex gap-3">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#00274C] text-white flex items-center justify-center text-sm font-bold">
                       {step.step}
                     </div>
                     <div>
-                      <h4 className="font-semibold text-[#00274C]">{step.title}</h4>
-                      <p className="text-gray-600 text-sm">{step.description}</p>
+                      <p className="font-medium text-[#00274C]">{step.title}</p>
+                      <p className="text-sm text-gray-600">{step.description}</p>
                     </div>
                   </div>
                 ))}
-              </div>
-
-              <div className="mt-8 p-4 bg-white rounded-xl border border-[#228B22]/30">
-                <div className="flex items-center gap-2 text-[#00274C] font-semibold">
-                  <svg className="w-5 h-5 text-[#228B22]" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  Verified Landlord Badge
-                </div>
               </div>
             </div>
           </div>
@@ -185,24 +164,21 @@ export default function TrustSafetyPage() {
       {/* Safety Tips */}
       <section className="section bg-gray-50">
         <div className="container">
-          <div className="text-center mb-16">
-            <span className="inline-block px-4 py-2 bg-[#00274C]/10 text-[#00274C] text-sm font-semibold rounded-full mb-4">
-              Safety Tips
-            </span>
-            <h2 className="mb-4">Stay Safe When Searching</h2>
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              While we verify all users, always practice caution. Follow these guidelines for a safe housing search.
+          <div className="text-center mb-12">
+            <h2 className="mb-4">Safety Tips</h2>
+            <p className="text-gray-600 max-w-xl mx-auto">
+              While we verify all users, always practice caution.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {safetyTips.map((tip, index) => (
-              <div key={index} className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-lg transition-shadow">
-                <div className="w-12 h-12 rounded-xl bg-[#FFCB05]/20 flex items-center justify-center text-[#00274C] mb-4">
+              <div key={index} className="bg-white rounded-xl p-6 border border-gray-200">
+                <div className="w-10 h-10 rounded-lg bg-[#00274C]/10 flex items-center justify-center text-[#00274C] mb-4">
                   {tip.icon}
                 </div>
-                <h3 className="text-lg font-semibold text-[#00274C] mb-2">{tip.title}</h3>
-                <p className="text-gray-600">{tip.description}</p>
+                <h3 className="font-semibold text-[#00274C] mb-2">{tip.title}</h3>
+                <p className="text-sm text-gray-600">{tip.description}</p>
               </div>
             ))}
           </div>
@@ -212,18 +188,12 @@ export default function TrustSafetyPage() {
       {/* Disclaimer */}
       <section className="section-sm bg-[#00274C]">
         <div className="container">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="w-12 h-12 rounded-full bg-[#FFCB05]/20 flex items-center justify-center mx-auto mb-6">
-              <svg className="w-6 h-6 text-[#FFCB05]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <p className="text-white/80 leading-relaxed mb-6">
+          <div className="max-w-2xl mx-auto text-center">
+            <p className="text-white/80 mb-4">
               <strong className="text-white">Important:</strong> Verification improves trust but does not replace independent due diligence. 
-              MaizeLease is a platform to connect students and landlords. We are not a party to any agreements between users. 
-              Always verify lease terms independently and consult with housing authorities if needed.
+              Always verify lease terms independently.
             </p>
-            <Link href="/contact" className="text-[#FFCB05] font-semibold hover:underline">
+            <Link href="/contact" className="text-[#FFCB05] font-medium hover:underline">
               Report suspicious activity →
             </Link>
           </div>
@@ -231,18 +201,18 @@ export default function TrustSafetyPage() {
       </section>
 
       {/* CTA */}
-      <section className="section bg-white">
+      <section className="section">
         <div className="container">
-          <div className="max-w-2xl mx-auto text-center">
+          <div className="max-w-xl mx-auto text-center">
             <h2 className="mb-4">Ready to Get Started?</h2>
-            <p className="text-gray-600 text-lg mb-8">
-              Join the trusted community of UMich students and landlords today.
+            <p className="text-gray-600 mb-8">
+              Join the trusted community of UMich students and landlords.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
-              <Link href="/register" className="btn btn-primary btn-lg">
+              <Link href="/register" className="btn btn-primary">
                 Create Free Account
               </Link>
-              <Link href="/listings" className="btn btn-outline btn-lg">
+              <Link href="/listings" className="btn btn-outline">
                 Browse Listings
               </Link>
             </div>

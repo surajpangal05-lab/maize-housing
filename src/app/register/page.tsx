@@ -1,13 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 
 export default function RegisterPage() {
-  const router = useRouter()
-  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -70,59 +67,38 @@ export default function RegisterPage() {
   
   if (success) {
     return (
-      <div className="min-h-screen bg-white">
-        <div className="border-b border-neutral-200">
-          <div className="max-w-md mx-auto px-4 py-4">
-            <Link href="/" className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors">
-              ← Back to Home
-            </Link>
-          </div>
-        </div>
-
-        <div className="max-w-md mx-auto px-4 py-16">
-          <div className="text-center mb-12">
-            <Image
-              src="/logo.png"
-              alt="MaizeLease"
-              width={160}
-              height={53}
-              className="h-12 w-auto mx-auto grayscale"
-            />
-          </div>
-
-          <div className="border border-neutral-200 p-8 text-center">
-            <div className="w-16 h-16 border border-neutral-900 flex items-center justify-center mx-auto mb-6">
-              <svg className="w-8 h-8 text-neutral-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md">
+          <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
+            <div className="w-16 h-16 rounded-full bg-[#FFCB05] flex items-center justify-center mx-auto mb-6">
+              <svg className="w-8 h-8 text-[#00274C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h1 className="text-2xl font-serif text-neutral-900 mb-2">Check your email</h1>
-            <p className="text-neutral-500 text-sm mb-6">
-              We&apos;ve sent a verification link to <strong className="text-neutral-900">{formData.email}</strong>
+            <h1 className="text-2xl font-bold text-[#00274C] mb-2">Check your email</h1>
+            <p className="text-gray-600 mb-6">
+              We&apos;ve sent a verification link to <strong>{formData.email}</strong>
             </p>
             
             {/* Demo mode */}
-            <div className="border border-dashed border-neutral-300 p-6 text-left mb-6">
-              <p className="text-xs font-mono text-neutral-500 tracking-wider mb-3">DEMO MODE</p>
-              <p className="text-sm text-neutral-600 mb-4">
+            <div className="bg-gray-50 rounded-lg p-4 text-left mb-6">
+              <p className="text-xs font-medium text-gray-500 mb-2">DEMO MODE</p>
+              <p className="text-sm text-gray-600 mb-3">
                 In production, you&apos;d receive an email. For testing:
               </p>
-              <code className="block bg-neutral-100 px-4 py-3 text-xs font-mono text-neutral-700 break-all">
+              <code className="block bg-gray-100 rounded px-3 py-2 text-xs text-gray-700 break-all mb-3">
                 {verificationToken}
               </code>
               <Link 
                 href={`/verify-email?token=${verificationToken}`}
-                className="mt-4 inline-block text-sm text-neutral-900 hover:underline"
+                className="text-sm text-[#00274C] font-medium hover:underline"
               >
                 Click here to verify →
               </Link>
             </div>
             
-            <Link 
-              href="/login" 
-              className="inline-block px-6 py-3 bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-800 transition-colors"
-            >
-              CONTINUE TO LOGIN
+            <Link href="/login" className="btn btn-primary w-full">
+              Continue to Login
             </Link>
           </div>
         </div>
@@ -131,105 +107,96 @@ export default function RegisterPage() {
   }
   
   return (
-    <div className="min-h-screen bg-white">
-      <div className="border-b border-neutral-200">
-        <div className="max-w-5xl mx-auto px-8 py-3">
-          <Link href="/" className="text-xs text-neutral-500 hover:text-neutral-900">
-            ← Back to Home
+    <div className="min-h-screen flex">
+      {/* Left Panel - Form */}
+      <div className="flex-1 flex items-center justify-center px-6 py-12">
+        <div className="w-full max-w-md">
+          {/* Logo */}
+          <Link href="/" className="inline-block mb-8">
+            <Image
+              src="/logo.png"
+              alt="MaizeLease"
+              width={160}
+              height={50}
+              className="h-12 w-auto"
+            />
           </Link>
-        </div>
-      </div>
-
-      <div className="max-w-sm mx-auto px-8 py-12">
-        <div className="text-center mb-12">
-          <Image
-            src="/logo.png"
-            alt="MaizeLease"
-            width={160}
-            height={53}
-            className="h-12 w-auto mx-auto grayscale"
-          />
-        </div>
-
-        <div className="border border-neutral-900 p-6">
-          <h1 className="text-3xl font-serif text-neutral-900 mb-2">Create Account</h1>
-          <p className="text-neutral-500 text-sm mb-8">Join the MaizeLease community</p>
+          
+          <h1 className="text-3xl font-bold text-[#00274C] mb-2">Create Account</h1>
+          <p className="text-gray-600 mb-8">Join the MaizeLease community</p>
           
           {/* User Type Selection */}
           <div className="mb-6">
-            <label className="label">I AM A...</label>
-            <div className="grid grid-cols-2 gap-0">
+            <label className="label">I am a...</label>
+            <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => setFormData({...formData, userType: 'STUDENT'})}
-                className={`p-4 border border-neutral-900 text-left transition-colors ${
+                className={`p-4 rounded-lg border-2 text-left transition-colors ${
                   formData.userType === 'STUDENT'
-                    ? 'bg-neutral-900 text-white'
-                    : 'hover:bg-neutral-100'
+                    ? 'border-[#FFCB05] bg-[#FFCB05]/10'
+                    : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
-                <span className="text-lg mb-1 block">🎓</span>
-                <span className={`text-sm ${formData.userType === 'STUDENT' ? 'text-white' : 'text-neutral-900'}`}>Student</span>
-                <p className={`text-xs mt-1 ${formData.userType === 'STUDENT' ? 'text-neutral-300' : 'text-neutral-500'}`}>
-                  @umich.edu email
-                </p>
+                <span className="text-xl mb-1 block">🎓</span>
+                <span className="font-medium text-[#00274C]">Student</span>
+                <p className="text-xs text-gray-500 mt-1">@umich.edu email</p>
               </button>
               <button
                 type="button"
                 onClick={() => setFormData({...formData, userType: 'LANDLORD'})}
-                className={`p-4 border border-neutral-900 border-l-0 text-left transition-colors ${
+                className={`p-4 rounded-lg border-2 text-left transition-colors ${
                   formData.userType === 'LANDLORD'
-                    ? 'bg-neutral-900 text-white'
-                    : 'hover:bg-neutral-100'
+                    ? 'border-[#FFCB05] bg-[#FFCB05]/10'
+                    : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
-                <span className="text-lg mb-1 block">🏠</span>
-                <span className={`text-sm ${formData.userType === 'LANDLORD' ? 'text-white' : 'text-neutral-900'}`}>Landlord</span>
-                <p className={`text-xs mt-1 ${formData.userType === 'LANDLORD' ? 'text-neutral-300' : 'text-neutral-500'}`}>
-                  Email + phone
-                </p>
+                <span className="text-xl mb-1 block">🏠</span>
+                <span className="font-medium text-[#00274C]">Landlord</span>
+                <p className="text-xs text-gray-500 mt-1">Email + phone</p>
               </button>
             </div>
           </div>
           
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="p-3 border border-red-500 text-red-600 text-xs">
+              <div className="alert alert-error">
+                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
                 {error}
               </div>
             )}
             
             <div>
-              <label className="label">FULL NAME</label>
+              <label className="label">Full Name</label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
                 placeholder="Your name"
                 required
-                className="w-full px-4 py-3 text-sm border border-neutral-900 focus:outline-none"
+                className="input"
               />
             </div>
             
             <div>
-              <label className="label">EMAIL</label>
+              <label className="label">Email</label>
               <input
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({...formData, email: e.target.value})}
                 placeholder={formData.userType === 'STUDENT' ? 'uniqname@umich.edu' : 'you@email.com'}
                 required
-                className="w-full px-4 py-3 text-sm border border-neutral-900 focus:outline-none"
+                className="input"
               />
               {formData.userType === 'STUDENT' && (
-                <p className="mt-1 text-xs text-neutral-500">
-                  Must be @umich.edu
-                </p>
+                <p className="mt-1 text-xs text-gray-500">Must be @umich.edu</p>
               )}
             </div>
             
             <div>
-              <label className="label">PASSWORD</label>
+              <label className="label">Password</label>
               <input
                 type="password"
                 value={formData.password}
@@ -237,36 +204,64 @@ export default function RegisterPage() {
                 placeholder="••••••••"
                 required
                 minLength={8}
-                className="w-full px-4 py-3 text-sm border border-neutral-900 focus:outline-none"
+                className="input"
               />
             </div>
             
             <div>
-              <label className="label">CONFIRM PASSWORD</label>
+              <label className="label">Confirm Password</label>
               <input
                 type="password"
                 value={formData.confirmPassword}
                 onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
                 placeholder="••••••••"
                 required
-                className="w-full px-4 py-3 text-sm border border-neutral-900 focus:outline-none"
+                className="input"
               />
             </div>
             
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-800 transition-colors disabled:opacity-50"
+              className="btn btn-primary w-full py-3.5"
             >
-              {loading ? 'CREATING ACCOUNT...' : 'CREATE ACCOUNT'}
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Creating account...
+                </span>
+              ) : (
+                'Create Account'
+              )}
             </button>
           </form>
           
-          <p className="mt-8 text-center text-sm text-neutral-500">
+          <p className="mt-8 text-center text-gray-600">
             Already have an account?{' '}
-            <Link href="/login" className="text-neutral-900 hover:underline">
+            <Link href="/login" className="font-semibold text-[#00274C] hover:underline">
               Sign in
             </Link>
+          </p>
+        </div>
+      </div>
+      
+      {/* Right Panel - Image/Branding */}
+      <div className="hidden lg:flex lg:w-1/2 bg-[#00274C] p-12 items-center justify-center relative">
+        <div className="text-center max-w-md">
+          <div className="w-20 h-20 rounded-3xl bg-[#FFCB05] flex items-center justify-center mx-auto mb-8">
+            <svg className="w-10 h-10 text-[#00274C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
+          </div>
+          
+          <h2 className="text-3xl font-bold text-white mb-4">
+            Join the Michigan Housing Community
+          </h2>
+          <p className="text-white/70 text-lg">
+            Create your free account and start browsing verified listings today.
           </p>
         </div>
       </div>

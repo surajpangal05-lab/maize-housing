@@ -1,19 +1,15 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { useSession, signOut } from 'next-auth/react'
 import { useState, useEffect } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 
 export default function Header() {
   const { data: session, status } = useSession()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const [searchOpen, setSearchOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
   const pathname = usePathname()
-  const router = useRouter()
   
   const isHomePage = pathname === '/'
 
@@ -29,59 +25,45 @@ export default function Header() {
     setMobileMenuOpen(false)
   }, [pathname])
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (searchQuery.trim()) {
-      router.push(`/listings?q=${encodeURIComponent(searchQuery)}`)
-      setSearchOpen(false)
-      setSearchQuery('')
-    }
-  }
-
   const navLinks = [
-    { text: 'Home', href: '/' },
     { text: 'Browse Listings', href: '/listings' },
     { text: 'Post a Listing', href: '/listings/create' },
-    { text: 'Resources', href: '/#resources' },
-    { text: 'FAQ', href: '/#faq' },
-    { text: 'Contact', href: '/contact' },
   ]
 
   return (
     <>
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled 
-          ? 'glass shadow-lg py-2' 
-          : 'bg-transparent py-4'
+        scrolled || !isHomePage
+          ? 'bg-white shadow-sm' 
+          : 'bg-[#00274C]/90 backdrop-blur-sm'
       }`}>
         <div className="container">
-          <div className="flex items-center justify-between gap-4">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 flex-shrink-0 group">
-              <div className="relative">
-                <Image 
-                  src="/logo.png" 
-                  alt="MaizeLease" 
-                  width={160} 
-                  height={50}
-                  className="h-10 w-auto transition-transform group-hover:scale-105"
-                  priority
-                />
+          <div className="flex items-center justify-between h-16">
+            {/* Logo - Text only for clarity */}
+            <Link href="/" className="flex items-center gap-2">
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-lg ${
+                scrolled || !isHomePage 
+                  ? 'bg-[#FFCB05] text-[#00274C]' 
+                  : 'bg-[#FFCB05] text-[#00274C]'
+              }`}>
+                M
               </div>
+              <span className="font-bold text-xl tracking-tight">
+                <span className={scrolled || !isHomePage ? 'text-[#00274C]' : 'text-white'}>Maize</span>
+                <span className="text-[#FFCB05]">Lease</span>
+              </span>
             </Link>
 
-            {/* Center Navigation - Desktop */}
-            <nav className="hidden lg:flex items-center gap-1">
+            {/* Desktop Nav */}
+            <nav className="hidden md:flex items-center gap-8">
               {navLinks.map((link) => (
                 <Link 
                   key={link.href}
                   href={link.href}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-                    pathname === link.href 
-                      ? 'text-[#00274C] bg-[#FFCB05]/20' 
-                      : scrolled || !isHomePage
-                        ? 'text-[#333] hover:text-[#00274C] hover:bg-gray-100'
-                        : 'text-white/90 hover:text-white hover:bg-white/10'
+                  className={`text-sm font-medium transition-colors ${
+                    scrolled || !isHomePage
+                      ? 'text-gray-600 hover:text-[#00274C]'
+                      : 'text-white/90 hover:text-white'
                   }`}
                 >
                   {link.text}
@@ -89,179 +71,90 @@ export default function Header() {
               ))}
             </nav>
 
-            {/* Right Section */}
-            <div className="flex items-center gap-3">
-              {/* Search Button */}
-              <button
-                onClick={() => setSearchOpen(!searchOpen)}
-                className={`p-2.5 rounded-lg transition-all ${
-                  scrolled || !isHomePage
-                    ? 'text-gray-600 hover:bg-gray-100'
-                    : 'text-white/90 hover:bg-white/10'
-                }`}
-                aria-label="Search"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </button>
-
-              {/* Auth Buttons */}
+            {/* Auth */}
+            <div className="hidden md:flex items-center gap-4">
               {status === 'loading' ? (
-                <div className="w-20 h-10 bg-gray-200 rounded-lg animate-pulse" />
+                <div className="w-20 h-9 bg-gray-200 rounded-lg animate-pulse" />
               ) : session ? (
-                <div className="hidden md:flex items-center gap-2">
+                <div className="flex items-center gap-4">
                   <Link 
                     href="/dashboard"
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
-                      scrolled || !isHomePage
-                        ? 'hover:bg-gray-100'
-                        : 'hover:bg-white/10'
+                    className={`text-sm font-medium ${
+                      scrolled || !isHomePage ? 'text-gray-600 hover:text-[#00274C]' : 'text-white/90 hover:text-white'
                     }`}
                   >
-                    <div className="w-8 h-8 rounded-full bg-[#FFCB05] flex items-center justify-center">
-                      <span className="text-[#00274C] text-sm font-bold">
-                        {session.user?.name?.[0]?.toUpperCase() || session.user?.email?.[0]?.toUpperCase() || 'U'}
-                      </span>
-                    </div>
-                    <span className={`text-sm font-medium ${
-                      scrolled || !isHomePage ? 'text-gray-700' : 'text-white'
-                    }`}>
-                      {session.user?.name?.split(' ')[0] || 'Account'}
-                    </span>
+                    Dashboard
                   </Link>
                   <button
                     onClick={() => signOut({ callbackUrl: '/' })}
-                    className={`px-3 py-2 text-sm font-medium rounded-lg transition-all ${
-                      scrolled || !isHomePage
-                        ? 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-                        : 'text-white/70 hover:text-white hover:bg-white/10'
+                    className={`text-sm font-medium ${
+                      scrolled || !isHomePage ? 'text-gray-500 hover:text-gray-700' : 'text-white/70 hover:text-white'
                     }`}
                   >
                     Sign Out
                   </button>
                 </div>
               ) : (
-                <div className="hidden md:flex items-center gap-2">
+                <>
                   <Link 
                     href="/login" 
-                    className={`px-4 py-2.5 text-sm font-semibold rounded-lg transition-all border-2 ${
-                      scrolled || !isHomePage
-                        ? 'border-[#FFCB05] text-[#00274C] hover:bg-[#FFCB05] hover:text-[#00274C]'
-                        : 'border-white/50 text-white hover:bg-white hover:text-[#00274C]'
+                    className={`text-sm font-medium ${
+                      scrolled || !isHomePage ? 'text-gray-600 hover:text-[#00274C]' : 'text-white/90 hover:text-white'
                     }`}
                   >
                     Log In
                   </Link>
                   <Link 
                     href="/register" 
-                    className="btn btn-secondary"
+                    className="px-4 py-2 bg-[#FFCB05] text-[#00274C] text-sm font-semibold rounded-lg hover:bg-[#e6b800] transition-colors"
                   >
-                    Sign Up
+                    Sign Up Free
                   </Link>
-                </div>
+                </>
               )}
-              
-              {/* Mobile menu button */}
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className={`lg:hidden p-2.5 rounded-lg transition-colors ${
-                  scrolled || !isHomePage
-                    ? 'text-gray-600 hover:bg-gray-100'
-                    : 'text-white hover:bg-white/10'
-                }`}
-                aria-label="Menu"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  {mobileMenuOpen ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  )}
-                </svg>
-              </button>
             </div>
+            
+            {/* Mobile menu button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className={`md:hidden p-2 rounded-lg ${
+                scrolled || !isHomePage ? 'text-gray-600 hover:bg-gray-100' : 'text-white hover:bg-white/10'
+              }`}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {mobileMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
           </div>
         </div>
 
-        {/* Search Dropdown */}
-        {searchOpen && (
-          <div className="absolute top-full left-0 right-0 bg-white shadow-xl border-t border-gray-100 animate-fade-in-down">
-            <div className="container py-4">
-              <form onSubmit={handleSearch} className="flex gap-3">
-                <div className="flex-1 relative">
-                  <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search listings by location, term, or keyword..."
-                    className="input pl-12"
-                    autoFocus
-                  />
-                </div>
-                <button type="submit" className="btn btn-primary">
-                  Search
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Mobile Navigation Drawer */}
+        {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden absolute top-full left-0 right-0 bg-white shadow-xl border-t border-gray-100 animate-fade-in-down">
+          <div className="md:hidden bg-white border-t border-gray-100 shadow-lg">
             <nav className="container py-4 space-y-1">
               {navLinks.map((link) => (
                 <Link 
                   key={link.href}
                   href={link.href}
-                  className={`block px-4 py-3 text-base font-medium rounded-lg transition-colors ${
-                    pathname === link.href 
-                      ? 'text-[#00274C] bg-[#FFCB05]/20' 
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                  onClick={() => setMobileMenuOpen(false)}
+                  className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium"
                 >
                   {link.text}
                 </Link>
               ))}
-              
-              <div className="pt-4 border-t border-gray-100 mt-4 space-y-2">
+              <div className="pt-4 mt-4 border-t border-gray-100 space-y-1">
                 {session ? (
                   <>
-                    <Link 
-                      href="/dashboard"
-                      className="block px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-100 rounded-lg"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      Dashboard
-                    </Link>
-                    <button
-                      onClick={() => { signOut({ callbackUrl: '/' }); setMobileMenuOpen(false); }}
-                      className="block w-full text-left px-4 py-3 text-base font-medium text-gray-500 hover:bg-gray-100 rounded-lg"
-                    >
-                      Sign Out
-                    </button>
+                    <Link href="/dashboard" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium">Dashboard</Link>
+                    <button onClick={() => signOut()} className="block w-full text-left px-4 py-3 text-gray-500 hover:bg-gray-50 rounded-lg">Sign Out</button>
                   </>
                 ) : (
                   <>
-                    <Link 
-                      href="/login"
-                      className="block w-full text-center py-3 text-base font-semibold border-2 border-[#FFCB05] text-[#00274C] rounded-lg hover:bg-[#FFCB05]/10"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      Log In
-                    </Link>
-                    <Link 
-                      href="/register"
-                      className="block w-full text-center py-3 text-base font-semibold bg-[#00274C] text-white rounded-lg hover:bg-[#1E3A5F]"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      Sign Up
-                    </Link>
+                    <Link href="/login" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium">Log In</Link>
+                    <Link href="/register" className="block px-4 py-3 bg-[#FFCB05] text-[#00274C] text-center font-semibold rounded-lg mt-2">Sign Up Free</Link>
                   </>
                 )}
               </div>
@@ -271,7 +164,7 @@ export default function Header() {
       </header>
 
       {/* Spacer for fixed header */}
-      <div className={isHomePage ? '' : 'h-20'} />
+      <div className="h-16" />
     </>
   )
 }
