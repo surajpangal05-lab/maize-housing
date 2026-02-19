@@ -4,74 +4,19 @@ import Link from 'next/link'
 import Image from 'next/image'
 
 export default function Footer() {
-  const links = {
-    browse: [
-      { text: 'All Listings', href: '/listings' },
-      { text: 'Subleases', href: '/listings?type=sublease' },
-      { text: 'Full Leases', href: '/listings?type=lease' },
-    ],
-    company: [
-      { text: 'How It Works', href: '/#how' },
-      { text: 'FAQ', href: '/#faq' },
-      { text: 'Contact', href: '/contact' },
-    ],
-  }
-
   return (
-    <footer className="bg-[#00274C] text-white">
-      <div className="container py-12">
-        <div className="grid md:grid-cols-4 gap-8">
-          {/* Brand */}
-          <div className="md:col-span-2">
-            <Link href="/" className="flex items-center gap-2 mb-4">
-              <Image 
-                src="/logo.png" 
-                alt="MaizeLease" 
-                width={32} 
-                height={32}
-                className="h-8 w-auto"
-              />
-              <span className="font-bold text-lg">
-                <span className="text-white">Maize</span>
-                <span className="text-[#FFCB05]">Lease</span>
-              </span>
-            </Link>
-            <p className="text-white/60 text-sm max-w-sm mb-4">
-              The trusted housing platform for University of Michigan students and Ann Arbor landlords.
-            </p>
-            <p className="text-white/40 text-xs">
-              © {new Date().getFullYear()} MaizeLease. All rights reserved.
-            </p>
-          </div>
-
-          {/* Browse Links */}
-          <div>
-            <h4 className="font-semibold text-[#FFCB05] mb-4 text-sm uppercase tracking-wide">Browse</h4>
-            <ul className="space-y-2">
-              {links.browse.map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className="text-white/70 hover:text-white text-sm transition-colors">
-                    {link.text}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Company Links */}
-          <div>
-            <h4 className="font-semibold text-[#FFCB05] mb-4 text-sm uppercase tracking-wide">Company</h4>
-            <ul className="space-y-2">
-              {links.company.map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className="text-white/70 hover:text-white text-sm transition-colors">
-                    {link.text}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
+    <footer className="bg-[#00274C] text-white py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <Link href="/" className="inline-flex items-center gap-2 mb-4">
+          <Image src="/logo.png" alt="MaizeLease" width={24} height={24} className="h-6 w-auto" />
+          <span className="text-xl font-bold text-[#FFCB05]">MaizeLease</span>
+        </Link>
+        <p className="text-blue-200 text-sm">
+          A trusted housing platform exclusively for University of Michigan students
+        </p>
+        <p className="text-blue-300 text-xs mt-4">
+          &copy; {new Date().getFullYear()} MaizeLease. Go Blue!
+        </p>
       </div>
     </footer>
   )
