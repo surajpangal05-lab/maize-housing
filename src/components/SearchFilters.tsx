@@ -44,7 +44,8 @@ export default function SearchFilters({ filters, onFilterChange }: SearchFilters
               placeholder="Search by location or keywords..."
               value={filters.neighborhood || ''}
               onChange={(e) => update('neighborhood', e.target.value || undefined)}
-              className="input pl-10"
+              className="input"
+              style={{ paddingLeft: '2.5rem' }}
             />
           </div>
         </div>

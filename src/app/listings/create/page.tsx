@@ -273,13 +273,13 @@ export default function CreateListingPage() {
                   <Field label="Monthly rent" required>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
-                      <input type="number" value={formData.rent} onChange={(e) => setFormData({ ...formData, rent: e.target.value })} placeholder="1200" required min="1" className="input pl-7" />
+                      <input type="number" value={formData.rent} onChange={(e) => setFormData({ ...formData, rent: e.target.value })} placeholder="1200" required min="1" className="input" style={{ paddingLeft: '1.75rem' }} />
                     </div>
                   </Field>
                   <Field label="Security deposit">
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
-                      <input type="number" value={formData.deposit} onChange={(e) => setFormData({ ...formData, deposit: e.target.value })} placeholder="1000" min="0" className="input pl-7" />
+                      <input type="number" value={formData.deposit} onChange={(e) => setFormData({ ...formData, deposit: e.target.value })} placeholder="1000" min="0" className="input" style={{ paddingLeft: '1.75rem' }} />
                     </div>
                   </Field>
                 </div>
