@@ -139,12 +139,12 @@ export default function CreateListingPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="bg-gradient-to-r from-[#00274C] to-[#003D6E] pt-10 pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Link href="/listings" className="inline-flex items-center gap-1 text-white/40 hover:text-white/70 text-sm mb-4 transition-colors">
+          <Link href="/listings" className="inline-flex items-center gap-1 text-white/70 hover:text-white text-sm mb-4 transition-colors">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             Back to listings
           </Link>
           <h1 className="text-white text-3xl font-bold">Post a listing</h1>
-          <p className="text-white/40 mt-2">Fill out the details below to list your place.</p>
+          <p className="text-white/70 mt-2">Fill out the details below to list your place.</p>
         </div>
       </div>
 

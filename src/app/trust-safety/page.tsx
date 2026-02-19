@@ -62,7 +62,7 @@ export default function TrustSafetyPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
             <h1 className="text-white text-3xl lg:text-4xl font-bold mb-3">Trust & Safety</h1>
-            <p className="text-white/50 text-base">Learn how our verification system works and how to stay safe when finding housing.</p>
+            <p className="text-white/70 text-base">Learn how our verification system works and how to stay safe when finding housing.</p>
           </div>
         </div>
       </div>

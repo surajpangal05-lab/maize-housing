@@ -11,10 +11,10 @@ export default function Footer() {
           <Image src="/logo.png" alt="MaizeLease" width={24} height={24} className="h-6 w-auto" />
           <span className="text-xl font-bold text-[#FFCB05]">MaizeLease</span>
         </Link>
-        <p className="text-blue-200 text-sm">
+        <p className="text-white/70 text-sm">
           A trusted housing platform exclusively for University of Michigan students
         </p>
-        <p className="text-blue-300 text-xs mt-4">
+        <p className="text-white/50 text-xs mt-4">
           &copy; {new Date().getFullYear()} MaizeLease. Go Blue!
         </p>
       </div>

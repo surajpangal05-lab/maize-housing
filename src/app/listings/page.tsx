@@ -76,7 +76,7 @@ export default function ListingsPage() {
             Back to Home
           </Link>
           <h1 className="text-4xl font-bold text-white mb-2">Browse Listings</h1>
-          <p className="text-blue-100 text-lg">Find your perfect Michigan home from verified students and landlords</p>
+          <p className="text-white/70 text-lg">Find your perfect Michigan home from verified students and landlords</p>
         </div>
       </div>
 

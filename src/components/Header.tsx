@@ -22,7 +22,7 @@ export default function Header() {
             <Image src="/logo.png" alt="MaizeLease" width={32} height={32} className="w-8 h-8 object-contain" priority />
             <div className="text-left">
               <h1 className="text-2xl font-bold text-[#FFCB05] leading-none">MaizeLease</h1>
-              <p className="text-xs text-blue-200">For Michigan Students Only</p>
+              <p className="text-xs text-white/70">For Michigan Students Only</p>
             </div>
           </Link>
 
@@ -43,7 +43,7 @@ export default function Header() {
                 <Link href="/dashboard" className="px-4 py-2 text-white hover:bg-white/10 rounded-lg transition-colors font-medium">
                   Dashboard
                 </Link>
-                <button onClick={() => signOut({ callbackUrl: '/' })} className="px-4 py-2 text-blue-200 hover:bg-white/10 rounded-lg transition-colors">
+                <button onClick={() => signOut({ callbackUrl: '/' })} className="px-4 py-2 text-white/70 hover:bg-white/10 rounded-lg transition-colors">
                   Sign Out
                 </button>
               </>
@@ -79,7 +79,7 @@ export default function Header() {
             {session ? (
               <>
                 <Link href="/dashboard" className="block px-4 py-3 text-white hover:bg-white/10 rounded-lg font-medium">Dashboard</Link>
-                <button onClick={() => signOut()} className="block w-full text-left px-4 py-3 text-blue-200 hover:bg-white/10 rounded-lg">Sign Out</button>
+                <button onClick={() => signOut()} className="block w-full text-left px-4 py-3 text-white/70 hover:bg-white/10 rounded-lg">Sign Out</button>
               </>
             ) : (
               <Link href="/login" className="block px-4 py-3 text-white hover:bg-white/10 rounded-lg font-medium">Log In</Link>
