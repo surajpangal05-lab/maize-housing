@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useSession, signOut } from 'next-auth/react'
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
@@ -39,14 +40,17 @@ export default function Header() {
       }`}>
         <div className="container">
           <div className="flex items-center justify-between h-16">
-            {/* Logo - Text only for clarity */}
-            <Link href="/" className="flex items-center gap-2">
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-lg ${
-                scrolled || !isHomePage 
-                  ? 'bg-[#FFCB05] text-[#00274C]' 
-                  : 'bg-[#FFCB05] text-[#00274C]'
-              }`}>
-                M
+            {/* Logo */}
+            <Link href="/" className="flex items-center gap-2.5">
+              <div className="w-9 h-9 bg-white rounded-lg p-1 flex items-center justify-center">
+                <Image 
+                  src="/logo.png" 
+                  alt="MaizeLease" 
+                  width={28} 
+                  height={28}
+                  className="w-7 h-7 object-contain"
+                  priority
+                />
               </div>
               <span className="font-bold text-xl tracking-tight">
                 <span className={scrolled || !isHomePage ? 'text-[#00274C]' : 'text-white'}>Maize</span>

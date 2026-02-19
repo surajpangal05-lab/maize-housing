@@ -14,8 +14,8 @@ export default function Home() {
                 FOR UMICH STUDENTS
               </p>
               
-              <h1 className="text-4xl sm:text-5xl lg:text-[56px] font-bold text-white leading-[1.1] mb-6">
-                Find Your Perfect<br />
+              <h1 className="text-4xl sm:text-5xl lg:text-[56px] font-bold leading-[1.1] mb-6">
+                <span className="text-white">Find Your Perfect</span><br />
                 <span className="text-[#FFCB05]">Ann Arbor Home</span>
               </h1>
               
