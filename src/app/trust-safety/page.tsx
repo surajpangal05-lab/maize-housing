@@ -72,7 +72,7 @@ export default function TrustSafetyPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-xs font-semibold mb-4">Verification</div>
-            <h2 className="text-3xl font-bold mb-3">How verification works</h2>
+            <h2 className="text-3xl font-bold mb-3 text-[#00274C]">How verification works</h2>
             <p className="text-slate-400 max-w-md mx-auto text-sm">Every user on MaizeLease goes through our verification process.</p>
           </div>
 
@@ -88,7 +88,7 @@ export default function TrustSafetyPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 text-amber-600 text-xs font-semibold mb-4">Safety</div>
-            <h2 className="text-3xl font-bold mb-3">Safety tips</h2>
+            <h2 className="text-3xl font-bold mb-3 text-[#00274C]">Safety tips</h2>
             <p className="text-slate-400 max-w-md mx-auto text-sm">While we verify all users, always practice caution.</p>
           </div>
 
@@ -126,7 +126,7 @@ export default function TrustSafetyPage() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-md mx-auto text-center">
-            <h2 className="text-2xl font-bold mb-3">Ready to get started?</h2>
+            <h2 className="text-2xl font-bold mb-3 text-[#00274C]">Ready to get started?</h2>
             <p className="text-slate-400 text-sm mb-8">Join the trusted community of UMich students and landlords.</p>
             <div className="flex flex-wrap gap-3 justify-center">
               <Link href="/register" className="inline-flex items-center justify-center bg-[#FFCB05] text-[#00274C] hover:bg-[#FFD42E] font-semibold py-2.5 px-6 rounded-lg border-2 border-[#FFCB05] transition-colors">Create free account</Link>

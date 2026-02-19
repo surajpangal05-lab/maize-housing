@@ -60,7 +60,7 @@ export default function CreateListingPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
-            <h1 className="text-2xl font-bold mb-2">Sign in required</h1>
+            <h1 className="text-2xl font-bold mb-2 text-[#00274C]">Sign in required</h1>
             <p className="text-slate-400 text-sm mb-6">You need to be signed in and verified to create a listing.</p>
             <Link href="/login?callbackUrl=/listings/create" className="inline-flex items-center justify-center bg-[#FFCB05] text-[#00274C] hover:bg-[#FFD42E] font-semibold py-2.5 px-6 rounded-lg border-2 border-[#FFCB05] transition-colors">Sign in to continue</Link>
           </div>
