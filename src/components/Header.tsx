@@ -20,10 +20,7 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <Image src="/logo.png" alt="MaizeLease" width={32} height={32} className="w-8 h-8 object-contain" priority />
-            <div className="text-left">
-              <h1 className="text-2xl font-bold text-[#FFCB05] leading-none">MaizeLease</h1>
-              <p className="text-xs text-white/70">For Michigan Students Only</p>
-            </div>
+            <span className="text-xl font-bold text-[#FFCB05]">MaizeLease</span>
           </Link>
 
           {/* Desktop Nav */}
