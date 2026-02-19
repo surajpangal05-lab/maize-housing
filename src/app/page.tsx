@@ -1,6 +1,44 @@
 import Link from 'next/link'
+import { prisma } from '@/lib/prisma'
 
-export default function Home() {
+async function getFeaturedListing() {
+  try {
+    const today = new Date()
+    const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000)
+
+    const count = await prisma.listing.count({ where: { status: 'ACTIVE' } })
+    if (count === 0) return null
+
+    const skip = dayOfYear % count
+
+    const listing = await prisma.listing.findFirst({
+      where: { status: 'ACTIVE' },
+      orderBy: { createdAt: 'desc' },
+      skip,
+      include: { user: { select: { name: true, email: true, userType: true, emailVerified: true, isUmichEmail: true } } },
+    })
+
+    return listing
+  } catch {
+    return null
+  }
+}
+
+function formatPrice(cents: number) {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(cents)
+}
+
+export default async function Home() {
+  const featured = await getFeaturedListing()
+
+  let featuredImage: string | null = null
+  if (featured?.images) {
+    try {
+      const imgs = JSON.parse(featured.images)
+      if (Array.isArray(imgs) && imgs.length > 0) featuredImage = imgs[0]
+    } catch { /* ignore */ }
+  }
+
   return (
     <div className="min-h-screen">
       {/* Hero */}
@@ -20,7 +58,7 @@ export default function Home() {
                 <span className="block text-[#FFCB05]">Michigan Home</span>
               </h1>
 
-              <p className="text-xl text-blue-100 mb-8 leading-relaxed">
+              <p className="text-xl text-white/80 mb-8 leading-relaxed">
                 The trusted platform connecting University of Michigan students with verified subleases and rental properties. Safe, simple, and exclusively for Wolverines.
               </p>
 
@@ -37,31 +75,98 @@ export default function Home() {
               <div className="mt-12 flex items-center gap-8 text-sm">
                 <div>
                   <div className="text-3xl font-bold text-[#FFCB05]">500+</div>
-                  <div className="text-blue-200">Active Listings</div>
+                  <div className="text-white/60">Active Listings</div>
                 </div>
                 <div>
                   <div className="text-3xl font-bold text-[#FFCB05]">2,000+</div>
-                  <div className="text-blue-200">Students Helped</div>
+                  <div className="text-white/60">Students Helped</div>
                 </div>
                 <div>
                   <div className="text-3xl font-bold text-[#FFCB05]">100%</div>
-                  <div className="text-blue-200">Verified Users</div>
+                  <div className="text-white/60">Verified Users</div>
                 </div>
               </div>
             </div>
 
+            {/* Featured Listing Card */}
             <div className="hidden md:block">
               <div className="relative">
                 <div className="absolute -inset-4 bg-[#FFCB05]/20 rounded-3xl blur-2xl" />
-                <div className="relative rounded-2xl shadow-2xl w-full h-[400px] bg-gradient-to-br from-[#003D6E] to-[#00274C] flex items-center justify-center overflow-hidden">
-                  <div className="text-center p-8">
-                    <div className="w-20 h-20 bg-[#FFCB05] rounded-2xl flex items-center justify-center mx-auto mb-6">
-                      <svg className="w-10 h-10 text-[#00274C]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                {featured ? (
+                  <Link href={`/listings/${featured.id}`} className="block relative">
+                    <div className="relative rounded-2xl shadow-2xl w-full overflow-hidden bg-white group">
+                      {/* Image */}
+                      <div className="h-52 bg-gradient-to-br from-[#003D6E] to-[#00274C] overflow-hidden">
+                        {featuredImage ? (
+                          <img src={featuredImage} alt={featured.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <svg className="w-16 h-16 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                          </div>
+                        )}
+                        <div className="absolute top-3 left-3">
+                          <span className="px-3 py-1 text-xs font-bold rounded-full bg-[#FFCB05] text-[#00274C]">
+                            ★ Featured Today
+                          </span>
+                        </div>
+                        <div className="absolute top-3 right-3">
+                          <span className={`px-3 py-1 text-xs font-semibold rounded-full text-white ${featured.type === 'SUBLEASE' ? 'bg-blue-600' : 'bg-green-600'}`}>
+                            {featured.type === 'SUBLEASE' ? 'Sublease' : 'Rental'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Content */}
+                      <div className="p-5">
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="text-lg font-bold text-[#00274C] line-clamp-1 flex-1 mr-3">{featured.title}</h3>
+                          <span className="text-xl font-bold text-[#00274C] whitespace-nowrap">
+                            {formatPrice(featured.rent)}<span className="text-sm font-normal text-gray-500">/mo</span>
+                          </span>
+                        </div>
+
+                        <p className="text-sm text-gray-500 flex items-center gap-1.5 mb-3">
+                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                          {featured.neighborhood || featured.city || 'Ann Arbor'}, {featured.state || 'MI'}
+                        </p>
+
+                        <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
+                          <span className="flex items-center gap-1">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                            {featured.bedrooms} bed
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                            {featured.bathrooms} bath
+                          </span>
+                          {featured.propertyType && (
+                            <span className="text-gray-400">{featured.propertyType.charAt(0) + featured.propertyType.slice(1).toLowerCase()}</span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                          <span className="text-xs text-gray-400">
+                            Posted by {featured.user?.name || featured.user?.email?.split('@')[0] || 'Verified User'}
+                          </span>
+                          <span className="text-sm font-semibold text-[#00274C] group-hover:text-[#003D6E] transition-colors flex items-center gap-1">
+                            View Listing
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-white/80 text-lg font-medium">Your next home awaits</p>
-                    <p className="text-white/40 text-sm mt-2">Verified listings near campus</p>
+                  </Link>
+                ) : (
+                  <div className="relative rounded-2xl shadow-2xl w-full h-[400px] bg-gradient-to-br from-[#003D6E] to-[#00274C] flex items-center justify-center overflow-hidden">
+                    <div className="text-center p-8">
+                      <div className="w-20 h-20 bg-[#FFCB05] rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <svg className="w-10 h-10 text-[#00274C]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                      </div>
+                      <p className="text-white text-lg font-medium">Your next home awaits</p>
+                      <p className="text-white/50 text-sm mt-2">Verified listings near campus</p>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
