@@ -1,24 +1,85 @@
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
+import { scraperPrisma } from '@/lib/scraper-db'
 
-async function getFeaturedListing() {
+export const revalidate = 86400
+
+type FeaturedListing = {
+  id: string
+  title: string
+  type: string
+  rent: number
+  bedrooms: number
+  bathrooms: number
+  neighborhood: string | null
+  city: string | null
+  state: string | null
+  propertyType: string | null
+  images: string | null
+  userName: string | null
+}
+
+async function getFeaturedListing(): Promise<FeaturedListing | null> {
+  const today = new Date()
+  const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000)
+
+  // Try main DB first
   try {
-    const today = new Date()
-    const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000)
-
     const count = await prisma.listing.count({ where: { status: 'ACTIVE' } })
+    if (count > 0) {
+      const listing = await prisma.listing.findFirst({
+        where: { status: 'ACTIVE' },
+        orderBy: { createdAt: 'desc' },
+        skip: dayOfYear % count,
+        include: { user: { select: { name: true, email: true } } },
+      })
+      if (listing) {
+        return {
+          id: listing.id,
+          title: listing.title,
+          type: listing.type,
+          rent: listing.rent,
+          bedrooms: listing.bedrooms,
+          bathrooms: listing.bathrooms,
+          neighborhood: listing.neighborhood,
+          city: listing.city,
+          state: listing.state,
+          propertyType: listing.propertyType,
+          images: listing.images,
+          userName: listing.user?.name || listing.user?.email?.split('@')[0] || null,
+        }
+      }
+    }
+  } catch { /* fall through to scraped */ }
+
+  // Fallback: scraped listings DB
+  try {
+    const count = await scraperPrisma.listing.count()
     if (count === 0) return null
 
-    const skip = dayOfYear % count
-
-    const listing = await prisma.listing.findFirst({
-      where: { status: 'ACTIVE' },
+    const listing = await scraperPrisma.listing.findFirst({
       orderBy: { createdAt: 'desc' },
-      skip,
-      include: { user: { select: { name: true, email: true, userType: true, emailVerified: true, isUmichEmail: true } } },
+      skip: dayOfYear % count,
+      include: { images: { orderBy: { sortOrder: 'asc' }, take: 1 } },
     })
+    if (!listing) return null
 
-    return listing
+    const imgUrl = listing.images?.[0]?.originalUrl || listing.images?.[0]?.storedUrl || null
+
+    return {
+      id: `scraped_${listing.id}`,
+      title: listing.title || (listing.beds ? `${listing.beds} BR` : 'Rental') + (listing.city ? ` in ${listing.city}` : ''),
+      type: 'RENTAL',
+      rent: listing.priceMin || listing.priceMax || 0,
+      bedrooms: listing.beds || 0,
+      bathrooms: listing.baths || 0,
+      neighborhood: null,
+      city: listing.city,
+      state: listing.state,
+      propertyType: listing.propertyType?.toUpperCase() || null,
+      images: imgUrl ? JSON.stringify([imgUrl]) : null,
+      userName: null,
+    }
   } catch {
     return null
   }
@@ -146,7 +207,7 @@ export default async function Home() {
 
                         <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                           <span className="text-xs text-gray-400">
-                            Posted by {featured.user?.name || featured.user?.email?.split('@')[0] || 'Verified User'}
+                            Posted by {featured.userName || 'Verified User'}
                           </span>
                           <span className="text-sm font-semibold text-[#00274C] group-hover:text-[#003D6E] transition-colors flex items-center gap-1">
                             View Listing
