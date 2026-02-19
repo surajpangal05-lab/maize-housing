@@ -53,9 +53,9 @@ export default async function Home() {
                 <span className="text-sm font-semibold">Verified Michigan Students Only</span>
               </div>
 
-              <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight text-white">
+              <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight" style={{ color: '#FFFFFF' }}>
                 Find Your Perfect
-                <span className="block text-[#FFCB05]">Michigan Home</span>
+                <span className="block" style={{ color: '#FFCB05' }}>Michigan Home</span>
               </h1>
 
               <p className="text-xl text-white/80 mb-8 leading-relaxed">
