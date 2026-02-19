@@ -6,6 +6,33 @@ import { listingSchema } from '@/lib/validations'
 import { getExpirationDate, getVerificationBadge } from '@/lib/utils'
 import { UserType } from '@/lib/types'
 
+function cleanAmenities(raw: unknown): string[] {
+  const strip = (s: string) => s.replace(/<[^>]*>/g, '').trim()
+
+  const items: string[] = []
+  if (Array.isArray(raw)) {
+    for (const entry of raw) {
+      const cleaned = strip(String(entry))
+      if (cleaned) {
+        // Split on newlines, commas, or multiple spaces in case values are concatenated
+        for (const part of cleaned.split(/[\n,]+|\s{2,}/)) {
+          const t = part.trim()
+          if (t) items.push(t)
+        }
+      }
+    }
+  } else if (typeof raw === 'string') {
+    const cleaned = strip(raw)
+    if (cleaned) {
+      for (const part of cleaned.split(/[\n,]+|\s{2,}/)) {
+        const t = part.trim()
+        if (t) items.push(t)
+      }
+    }
+  }
+  return [...new Set(items)]
+}
+
 // Fetch scraped listings directly from database
 async function fetchScrapedListings(searchParams: URLSearchParams) {
   try {
@@ -83,7 +110,7 @@ async function fetchScrapedListings(searchParams: URLSearchParams) {
         moveInWindowStart: null,
         moveInWindowEnd: null,
         leaseEndDate: null,
-        amenities: scraped.amenitiesJson ? JSON.stringify(scraped.amenitiesJson) : null,
+        amenities: scraped.amenitiesJson ? JSON.stringify(cleanAmenities(scraped.amenitiesJson)) : null,
         images: images.length > 0 ? JSON.stringify(images) : null,
         createdAt: scraped.createdAt.toISOString(),
         updatedAt: scraped.updatedAt.toISOString(),
