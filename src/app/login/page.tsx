@@ -29,8 +29,8 @@ function LoginForm() {
       })
       
       if (result?.error) {
-        if (result.error.includes('EMAIL_NOT_VERIFIED')) {
-          setError('Your email is not verified. Please register again to verify your email.')
+        if (result.code === 'email_not_verified') {
+          setError('This account was never verified. Use "Forgot password?" to verify your email and set a password.')
         } else {
           setError('Invalid email or password')
         }
