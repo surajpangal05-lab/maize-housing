@@ -6,6 +6,39 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ListingType, PropertyType, TermTag } from '@/lib/types'
 
+function isoToDisplay(isoDate: string): string {
+  if (!isoDate) return ''
+  const [y, m, d] = isoDate.split('-')
+  if (!y || !m || !d) return ''
+  return `${m}/${d}/${y}`
+}
+
+function displayToIso(display: string): string {
+  const digits = display.replace(/\D/g, '')
+  if (digits.length !== 8) return ''
+  const m = digits.slice(0, 2)
+  const d = digits.slice(2, 4)
+  const y = digits.slice(4, 8)
+  const month = parseInt(m, 10)
+  const day = parseInt(d, 10)
+  const year = parseInt(y, 10)
+  if (month >= 1 && month <= 12 && day >= 1 && day <= 31 && year >= 2020 && year <= 2099) {
+    return `${y}-${m}-${d}`
+  }
+  return ''
+}
+
+function autoFormatDate(raw: string): string {
+  const digits = raw.replace(/\D/g, '').slice(0, 8)
+  if (digits.length <= 2) return digits
+  if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`
+}
+
+function formatMoneyInput(raw: string): string {
+  return raw.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1')
+}
+
 const PROPERTY_TYPES: { value: PropertyType; label: string }[] = [
   { value: 'APARTMENT', label: 'Apartment' },
   { value: 'HOUSE', label: 'House' },
@@ -37,6 +70,8 @@ export default function CreateListingPage() {
     moveInDate: '', moveInWindowStart: '', moveInWindowEnd: '', leaseEndDate: '', amenities: [] as string[], images: [] as string[],
   })
 
+  const [moveInDisplay, setMoveInDisplay] = useState('')
+  const [leaseEndDisplay, setLeaseEndDisplay] = useState('')
   const [imageFiles, setImageFiles] = useState<File[]>([])
   const [imagePreviews, setImagePreviews] = useState<string[]>([])
   const [error, setError] = useState('')
@@ -266,20 +301,108 @@ export default function CreateListingPage() {
               <h2 className="font-semibold mb-4">Dates & pricing</h2>
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
-                  <Field label="Move-in date" required><input type="date" value={formData.moveInDate} onChange={(e) => setFormData({ ...formData, moveInDate: e.target.value })} required className="input" /></Field>
-                  <Field label="Lease end date" required><input type="date" value={formData.leaseEndDate} onChange={(e) => setFormData({ ...formData, leaseEndDate: e.target.value })} required className="input" /></Field>
+                  <Field label="Move-in date" required>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="MM/DD/YYYY"
+                        value={moveInDisplay}
+                        onChange={(e) => {
+                          const formatted = autoFormatDate(e.target.value)
+                          setMoveInDisplay(formatted)
+                          const iso = displayToIso(formatted)
+                          setFormData(prev => ({ ...prev, moveInDate: iso }))
+                        }}
+                        onBlur={() => {
+                          if (formData.moveInDate) {
+                            setMoveInDisplay(isoToDisplay(formData.moveInDate))
+                          } else if (moveInDisplay.replace(/\D/g, '').length > 0 && moveInDisplay.replace(/\D/g, '').length < 8) {
+                            setMoveInDisplay('')
+                          }
+                        }}
+                        maxLength={10}
+                        className="input"
+                        style={{ paddingRight: '2.5rem' }}
+                      />
+                      <input
+                        type="date"
+                        value={formData.moveInDate}
+                        onChange={(e) => {
+                          setFormData(prev => ({ ...prev, moveInDate: e.target.value }))
+                          setMoveInDisplay(isoToDisplay(e.target.value))
+                        }}
+                        className="absolute right-0 top-0 w-10 h-full opacity-0 cursor-pointer"
+                        tabIndex={-1}
+                      />
+                      <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    </div>
+                  </Field>
+                  <Field label="Lease end date" required>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="MM/DD/YYYY"
+                        value={leaseEndDisplay}
+                        onChange={(e) => {
+                          const formatted = autoFormatDate(e.target.value)
+                          setLeaseEndDisplay(formatted)
+                          const iso = displayToIso(formatted)
+                          setFormData(prev => ({ ...prev, leaseEndDate: iso }))
+                        }}
+                        onBlur={() => {
+                          if (formData.leaseEndDate) {
+                            setLeaseEndDisplay(isoToDisplay(formData.leaseEndDate))
+                          } else if (leaseEndDisplay.replace(/\D/g, '').length > 0 && leaseEndDisplay.replace(/\D/g, '').length < 8) {
+                            setLeaseEndDisplay('')
+                          }
+                        }}
+                        maxLength={10}
+                        className="input"
+                        style={{ paddingRight: '2.5rem' }}
+                      />
+                      <input
+                        type="date"
+                        value={formData.leaseEndDate}
+                        onChange={(e) => {
+                          setFormData(prev => ({ ...prev, leaseEndDate: e.target.value }))
+                          setLeaseEndDisplay(isoToDisplay(e.target.value))
+                        }}
+                        className="absolute right-0 top-0 w-10 h-full opacity-0 cursor-pointer"
+                        tabIndex={-1}
+                      />
+                      <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    </div>
+                  </Field>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <Field label="Monthly rent" required>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
-                      <input type="number" value={formData.rent} onChange={(e) => setFormData({ ...formData, rent: e.target.value })} placeholder="1200" required min="1" className="input" style={{ paddingLeft: '1.75rem' }} />
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        value={formData.rent}
+                        onChange={(e) => setFormData({ ...formData, rent: formatMoneyInput(e.target.value) })}
+                        placeholder="1200"
+                        className="input"
+                        style={{ paddingLeft: '1.75rem' }}
+                      />
                     </div>
                   </Field>
                   <Field label="Security deposit">
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
-                      <input type="number" value={formData.deposit} onChange={(e) => setFormData({ ...formData, deposit: e.target.value })} placeholder="1000" min="0" className="input" style={{ paddingLeft: '1.75rem' }} />
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        value={formData.deposit}
+                        onChange={(e) => setFormData({ ...formData, deposit: formatMoneyInput(e.target.value) })}
+                        placeholder="1000"
+                        className="input"
+                        style={{ paddingLeft: '1.75rem' }}
+                      />
                     </div>
                   </Field>
                 </div>
