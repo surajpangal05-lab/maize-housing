@@ -2,7 +2,6 @@ import NextAuth from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
 import { prisma } from './prisma'
-import { isUmichEmail } from './utils'
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -32,6 +31,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         if (!isValid) {
           return null
+        }
+
+        if (!user.emailVerified) {
+          throw new Error('EMAIL_NOT_VERIFIED')
         }
 
         // Update last active
@@ -83,86 +86,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     strategy: 'jwt',
   },
 })
-
-export async function registerUser(
-  email: string,
-  password: string,
-  name: string,
-  userType: 'STUDENT' | 'LANDLORD'
-) {
-  const existingUser = await prisma.user.findUnique({
-    where: { email },
-  })
-
-  if (existingUser) {
-    throw new Error('Email already registered')
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 12)
-  const isUmich = isUmichEmail(email)
-
-  // Students must use .edu email
-  if (userType === 'STUDENT' && !isUmich) {
-    throw new Error('Students must register with a @umich.edu email address')
-  }
-
-  const user = await prisma.user.create({
-    data: {
-      email,
-      passwordHash: hashedPassword,
-      name,
-      userType,
-      isUmichEmail: isUmich,
-    },
-  })
-
-  // Create verification token
-  const token = Math.random().toString(36).substring(2, 8).toUpperCase()
-  const expires = new Date()
-  expires.setHours(expires.getHours() + 24)
-
-  await prisma.verificationToken.create({
-    data: {
-      userId: user.id,
-      email: user.email,
-      token,
-      type: 'EMAIL',
-      expires,
-    },
-  })
-
-  return { user, verificationToken: token }
-}
-
-export async function verifyEmail(token: string) {
-  const verificationToken = await prisma.verificationToken.findUnique({
-    where: { token },
-    include: { user: true },
-  })
-
-  if (!verificationToken) {
-    throw new Error('Invalid verification token')
-  }
-
-  if (verificationToken.expires < new Date()) {
-    throw new Error('Verification token has expired')
-  }
-
-  if (verificationToken.type !== 'EMAIL') {
-    throw new Error('Invalid token type')
-  }
-
-  await prisma.user.update({
-    where: { id: verificationToken.userId! },
-    data: { emailVerified: new Date() },
-  })
-
-  await prisma.verificationToken.delete({
-    where: { id: verificationToken.id },
-  })
-
-  return verificationToken.user
-}
 
 export async function sendPhoneVerification(userId: string, phone: string) {
   const token = Math.floor(100000 + Math.random() * 900000).toString()

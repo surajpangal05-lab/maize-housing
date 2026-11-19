@@ -29,7 +29,11 @@ function LoginForm() {
       })
       
       if (result?.error) {
-        setError('Invalid email or password')
+        if (result.error.includes('EMAIL_NOT_VERIFIED')) {
+          setError('Your email is not verified. Please register again to verify your email.')
+        } else {
+          setError('Invalid email or password')
+        }
       } else {
         router.push(callbackUrl)
         router.refresh()
