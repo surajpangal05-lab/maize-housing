@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import CodeInput, { EMPTY_CODE } from '@/components/CodeInput'
 
 type Step = 'form' | 'verify' | 'done'
 
@@ -15,23 +16,17 @@ export default function RegisterPage() {
     confirmPassword: '',
     userType: 'STUDENT' as 'STUDENT' | 'LANDLORD',
   })
-  const [code, setCode] = useState(['', '', '', '', '', ''])
+  const [code, setCode] = useState<string[]>(EMPTY_CODE)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [resendCooldown, setResendCooldown] = useState(0)
-  const codeRefs = useRef<(HTMLInputElement | null)[]>([])
+  const lastAttemptedCode = useRef('')
 
   useEffect(() => {
     if (resendCooldown <= 0) return
     const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000)
     return () => clearTimeout(timer)
   }, [resendCooldown])
-
-  useEffect(() => {
-    if (step === 'verify') {
-      codeRefs.current[0]?.focus()
-    }
-  }, [step])
 
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -84,7 +79,8 @@ export default function RegisterPage() {
       const data = await res.json()
       if (data.success) {
         setResendCooldown(60)
-        setCode(['', '', '', '', '', ''])
+        setCode(EMPTY_CODE)
+        lastAttemptedCode.current = ''
       } else {
         setError(data.error || 'Failed to resend code')
       }
@@ -95,42 +91,14 @@ export default function RegisterPage() {
     }
   }
 
-  const handleCodeChange = (index: number, value: string) => {
-    if (!/^\d*$/.test(value)) return
-    const newCode = [...code]
-    newCode[index] = value.slice(-1)
-    setCode(newCode)
-
-    if (value && index < 5) {
-      codeRefs.current[index + 1]?.focus()
-    }
-  }
-
-  const handleCodeKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === 'Backspace' && !code[index] && index > 0) {
-      codeRefs.current[index - 1]?.focus()
-    }
-  }
-
-  const handleCodePaste = (e: React.ClipboardEvent) => {
-    e.preventDefault()
-    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6)
-    if (!pasted) return
-    const newCode = [...code]
-    for (let i = 0; i < 6; i++) {
-      newCode[i] = pasted[i] || ''
-    }
-    setCode(newCode)
-    const focusIndex = Math.min(pasted.length, 5)
-    codeRefs.current[focusIndex]?.focus()
-  }
-
   const handleVerifyAndRegister = async () => {
     const fullCode = code.join('')
     if (fullCode.length !== 6) {
       setError('Please enter the full 6-digit code')
       return
     }
+    if (loading || lastAttemptedCode.current === fullCode) return
+    lastAttemptedCode.current = fullCode
 
     setError('')
     setLoading(true)
@@ -159,11 +127,14 @@ export default function RegisterPage() {
     }
   }
 
+  // Auto-submit once all six digits are present. The ref above stops the same
+  // code from being sent twice (e.g. effect + button click).
   useEffect(() => {
-    if (step === 'verify' && code.every(d => d !== '') && code.join('').length === 6) {
+    if (step === 'verify' && code.every(d => d !== '')) {
       handleVerifyAndRegister()
     }
-  }, [code])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code, step])
 
   if (step === 'done') {
     return (
@@ -214,21 +185,8 @@ export default function RegisterPage() {
               </div>
             )}
 
-            <div className="flex justify-center gap-2.5 mb-6" onPaste={handleCodePaste}>
-              {code.map((digit, i) => (
-                <input
-                  key={i}
-                  ref={el => { codeRefs.current[i] = el }}
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={1}
-                  value={digit}
-                  onChange={e => handleCodeChange(i, e.target.value)}
-                  onKeyDown={e => handleCodeKeyDown(i, e)}
-                  className="w-12 h-14 text-center text-xl font-bold border-2 border-gray-200 rounded-lg focus:border-[#00274C] focus:ring-0 focus:outline-none transition-colors"
-                  disabled={loading}
-                />
-              ))}
+            <div className="mb-6">
+              <CodeInput value={code} onChange={setCode} disabled={loading} />
             </div>
 
             <button
@@ -259,7 +217,7 @@ export default function RegisterPage() {
             </div>
 
             <div className="mt-6 pt-6 border-t border-gray-100 text-center">
-              <button onClick={() => { setStep('form'); setError(''); setCode(['', '', '', '', '', '']) }} className="text-sm text-gray-500 hover:text-[#00274C]">
+              <button onClick={() => { setStep('form'); setError(''); setCode(EMPTY_CODE); lastAttemptedCode.current = '' }} className="text-sm text-gray-500 hover:text-[#00274C]">
                 ← Back to registration
               </button>
             </div>

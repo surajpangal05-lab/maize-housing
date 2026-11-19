@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { registerSchema } from '@/lib/validations'
 import { isUmichEmail } from '@/lib/utils'
+import { checkEmailCode } from '@/lib/verification'
 import bcrypt from 'bcryptjs'
 
 export async function POST(request: Request) {
@@ -10,10 +11,7 @@ export async function POST(request: Request) {
     const { code, ...rest } = body
 
     if (!code || typeof code !== 'string') {
-      return NextResponse.json(
-        { success: false, error: 'Verification code is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ success: false, error: 'Verification code is required' }, { status: 400 })
     }
 
     const validatedData = registerSchema.parse(rest)
@@ -26,59 +24,43 @@ export async function POST(request: Request) {
       )
     }
 
-    // Verify the code
-    const verificationToken = await prisma.verificationToken.findFirst({
-      where: {
-        email: normalizedEmail,
-        token: code.trim(),
-        type: 'EMAIL',
-      },
-    })
-
-    if (!verificationToken) {
+    const check = await checkEmailCode(normalizedEmail, code, 'EMAIL')
+    if (!check.ok) {
       return NextResponse.json(
-        { success: false, error: 'Invalid verification code' },
+        {
+          success: false,
+          error: check.reason === 'expired'
+            ? 'Verification code has expired. Please request a new one.'
+            : 'Invalid verification code',
+        },
         { status: 400 }
       )
     }
 
-    if (verificationToken.expires < new Date()) {
-      await prisma.verificationToken.delete({ where: { id: verificationToken.id } })
-      return NextResponse.json(
-        { success: false, error: 'Verification code has expired. Please request a new one.' },
-        { status: 400 }
-      )
-    }
-
-    // Check if user already exists (race condition guard)
-    const existingUser = await prisma.user.findUnique({
-      where: { email: normalizedEmail },
-    })
-
-    if (existingUser) {
+    const existingUser = await prisma.user.findUnique({ where: { email: normalizedEmail } })
+    if (existingUser?.emailVerified) {
       return NextResponse.json(
         { success: false, error: 'An account with this email already exists' },
         { status: 400 }
       )
     }
 
-    const hashedPassword = await bcrypt.hash(validatedData.password, 12)
-    const isUmich = isUmichEmail(normalizedEmail)
+    const passwordHash = await bcrypt.hash(validatedData.password, 12)
+    const data = {
+      passwordHash,
+      name: validatedData.name,
+      userType: validatedData.userType,
+      isUmichEmail: isUmichEmail(normalizedEmail),
+      emailVerified: new Date(),
+    }
 
-    // Create user with email already verified
-    const user = await prisma.user.create({
-      data: {
-        email: normalizedEmail,
-        passwordHash: hashedPassword,
-        name: validatedData.name,
-        userType: validatedData.userType,
-        isUmichEmail: isUmich,
-        emailVerified: new Date(),
-      },
-    })
+    // An unverified account from the old link-based flow is claimed by whoever
+    // proves ownership of the email now, rather than left permanently locked.
+    const user = existingUser
+      ? await prisma.user.update({ where: { id: existingUser.id }, data })
+      : await prisma.user.create({ data: { email: normalizedEmail, ...data } })
 
-    // Clean up the verification token
-    await prisma.verificationToken.delete({ where: { id: verificationToken.id } })
+    await prisma.verificationToken.delete({ where: { id: check.tokenId } })
 
     return NextResponse.json({
       success: true,
@@ -87,14 +69,8 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     if (error instanceof Error) {
-      return NextResponse.json(
-        { success: false, error: error.message },
-        { status: 400 }
-      )
+      return NextResponse.json({ success: false, error: error.message }, { status: 400 })
     }
-    return NextResponse.json(
-      { success: false, error: 'Registration failed' },
-      { status: 500 }
-    )
+    return NextResponse.json({ success: false, error: 'Registration failed' }, { status: 500 })
   }
 }

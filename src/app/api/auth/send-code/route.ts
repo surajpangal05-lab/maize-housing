@@ -2,16 +2,14 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendVerificationCode } from '@/lib/email'
 import { isUmichEmail } from '@/lib/utils'
+import { issueEmailCode } from '@/lib/verification'
 
 export async function POST(request: Request) {
   try {
     const { email, userType } = await request.json()
 
     if (!email || typeof email !== 'string') {
-      return NextResponse.json(
-        { success: false, error: 'Email is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ success: false, error: 'Email is required' }, { status: 400 })
     }
 
     const normalizedEmail = email.trim().toLowerCase()
@@ -23,50 +21,23 @@ export async function POST(request: Request) {
       )
     }
 
-    const existingUser = await prisma.user.findUnique({
-      where: { email: normalizedEmail },
-    })
-
-    if (existingUser) {
+    // Accounts created under the old flow may exist without ever having been
+    // verified. Let those owners finish signing up; only block verified accounts.
+    const existingUser = await prisma.user.findUnique({ where: { email: normalizedEmail } })
+    if (existingUser?.emailVerified) {
       return NextResponse.json(
-        { success: false, error: 'An account with this email already exists' },
+        { success: false, error: 'An account with this email already exists. Try signing in or resetting your password.' },
         { status: 400 }
       )
     }
 
-    // Rate limit: max 1 code per email per 60 seconds
-    const recentToken = await prisma.verificationToken.findFirst({
-      where: {
-        email: normalizedEmail,
-        type: 'EMAIL',
-        createdAt: { gt: new Date(Date.now() - 60_000) },
-      },
-    })
-
-    if (recentToken) {
+    const code = await issueEmailCode(normalizedEmail, 'EMAIL')
+    if (!code) {
       return NextResponse.json(
         { success: false, error: 'Please wait 60 seconds before requesting a new code' },
         { status: 429 }
       )
     }
-
-    // Clean up old tokens for this email
-    await prisma.verificationToken.deleteMany({
-      where: { email: normalizedEmail, type: 'EMAIL' },
-    })
-
-    // Generate 6-digit code
-    const code = Math.floor(100000 + Math.random() * 900000).toString()
-    const expires = new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
-
-    await prisma.verificationToken.create({
-      data: {
-        email: normalizedEmail,
-        token: code,
-        type: 'EMAIL',
-        expires,
-      },
-    })
 
     try {
       await sendVerificationCode(normalizedEmail, code)
@@ -78,15 +49,9 @@ export async function POST(request: Request) {
       )
     }
 
-    return NextResponse.json({
-      success: true,
-      message: 'Verification code sent to your email',
-    })
+    return NextResponse.json({ success: true, message: 'Verification code sent to your email' })
   } catch (error) {
     console.error('Send code error:', error)
-    return NextResponse.json(
-      { success: false, error: 'Something went wrong' },
-      { status: 500 }
-    )
+    return NextResponse.json({ success: false, error: 'Something went wrong' }, { status: 500 })
   }
 }
